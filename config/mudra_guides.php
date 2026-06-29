@@ -49,17 +49,17 @@ return [
     ],
 
     'shikhar' => [
-        'symbol' => '👍',
+        'symbol' => '✊',
         'steps' => [
-            'Close all fingers into a fist.',
-            'Point the thumb straight up.',
+            'Make a closed fist.',
+            'Face the fist towards the camera, about an arm’s length away.',
             'Keep the fist firm but relaxed.',
-            'Hold steady and breathe normally.',
+            'Hold steady until the bar fills.',
         ],
         'mistakes' => [
-            'Thumb tucked inside the fist',
-            'Thumb pointing sideways instead of up',
-            'Loose or shaking fist',
+            'Fist loose or shaking',
+            'Hand too far away or out of frame',
+            'Fist turned away from the camera',
         ],
     ],
 

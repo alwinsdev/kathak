@@ -161,9 +161,14 @@ function boot() {
                 loop = new DetectionLoop(camera, detectUrl, {
                     intervalMs,
                     onResult: handleResult,
-                    onError: (error) => {
+                    onError: (error, status) => {
                         setDot(DOT.none);
-                        setMessage(error?.message ? `⚠ ${error.message}` : 'Reconnecting…');
+                        if (status === 419) {
+                            setMessage('⚠ Your session expired. Please refresh the page to continue.');
+                            loop?.stop();
+                        } else {
+                            setMessage(error?.message ? `⚠ ${error.message}` : 'Reconnecting…');
+                        }
                     },
                 });
                 loop.start();

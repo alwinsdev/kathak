@@ -30,7 +30,7 @@ class MudraSeeder extends Seeder
             ['name' => 'Arala', 'ai' => 'aral', 'description' => 'Index curved, others slightly bent.', 'benefits' => 'Loosens stiff fingers.'],
             ['name' => 'Shukatunda', 'ai' => 'shuktund', 'description' => 'Like Arala but ring finger also curved.', 'benefits' => 'Targets joint stiffness.'],
             ['name' => 'Mushti', 'ai' => 'mushti', 'description' => 'Closed fist with thumb on top.', 'benefits' => 'Builds grip strength.'],
-            ['name' => 'Shikhara', 'ai' => 'shikhar', 'description' => 'Closed fist, thumb pointing up.', 'benefits' => 'Stabilizes wrist, builds strength.'],
+            ['name' => 'Shikhara', 'ai' => 'shikhar', 'description' => 'Closed fist held up, facing the camera.', 'benefits' => 'Stabilizes wrist, builds strength.'],
         ];
 
         foreach ($mudras as $mudra) {
