@@ -44,14 +44,15 @@ class PatientPagesTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_practice_entry_is_a_placeholder_for_own_prescription(): void
+    public function test_patient_can_open_practice_screen_for_own_prescription(): void
     {
         $patient = $this->patient();
         $prescription = Prescription::factory()->create(['patient_id' => $patient->id]);
 
         $this->actingAs($patient)->get(route('patient.practice.show', $prescription))
             ->assertOk()
-            ->assertSee('coming in L4');
+            ->assertSee($prescription->mudra->name)
+            ->assertSee('Detection Status');
     }
 
     public function test_practice_entry_is_forbidden_for_another_patient(): void

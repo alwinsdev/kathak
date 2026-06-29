@@ -12,8 +12,8 @@ use Illuminate\View\View;
 class PracticeController extends Controller
 {
     /**
-     * Practice entry point. Placeholder until L4 adds the live camera + AI
-     * verification screen. Ownership is enforced here so it is ready for L4.
+     * The live AI practice screen for one of the patient's own prescriptions.
+     * The camera + detection behaviour is driven by config (no magic numbers).
      */
     public function show(Prescription $prescription): View
     {
@@ -21,6 +21,14 @@ class PracticeController extends Controller
 
         $prescription->load('mudra');
 
-        return view('patient.practice.show', compact('prescription'));
+        return view('patient.practice.show', [
+            'prescription' => $prescription,
+            'practiceConfig' => [
+                'holdSeconds' => (int) config('practice.hold_seconds'),
+                'detectionIntervalMs' => (int) config('practice.detection_interval_ms'),
+                'jpegQuality' => (float) config('practice.jpeg_quality'),
+                'confidenceThreshold' => (float) config('practice.confidence_threshold'),
+            ],
+        ]);
     }
 }

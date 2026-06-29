@@ -4,13 +4,40 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Enums\PracticeStatus;
 use App\Models\PracticeSession;
+use App\Models\Prescription;
 use App\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
 class PracticeSessionRepository
 {
+    /**
+     * The patient's in-progress session for a prescription today, if any.
+     */
+    public function currentInProgressToday(Prescription $prescription): ?PracticeSession
+    {
+        return PracticeSession::query()
+            ->where('prescription_id', $prescription->id)
+            ->where('status', PracticeStatus::InProgress)
+            ->whereDate('practiced_on', Carbon::today())
+            ->latest('id')
+            ->first();
+    }
+
+    /**
+     * A verified session for a prescription today, if one already exists.
+     */
+    public function verifiedToday(Prescription $prescription): ?PracticeSession
+    {
+        return PracticeSession::query()
+            ->where('prescription_id', $prescription->id)
+            ->where('status', PracticeStatus::Verified)
+            ->whereDate('practiced_on', Carbon::today())
+            ->first();
+    }
+
     /**
      * Prescription ids the patient has a verified session for on the given date.
      *

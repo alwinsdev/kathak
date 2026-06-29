@@ -13,10 +13,12 @@ class LogPracticeVerified
     {
         $session = $event->session;
 
-        Log::channel('business')->info('Practice verified', [
-            'practice_session_id' => $session->id,
-            'prescription_id' => $session->prescription_id,
+        Log::channel('business')->info('practice_verified', [
+            'correlation_id' => $event->correlationId,
             'patient_id' => $session->patient_id,
+            'prescription_id' => $session->prescription_id,
+            'practice_session_id' => $session->id,
+            'detected_class' => $session->detected_class,
             'best_confidence' => $session->best_confidence,
         ]);
     }

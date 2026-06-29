@@ -8,6 +8,8 @@ use App\Http\Controllers\Doctor\PrescriptionController as DoctorPrescriptionCont
 use App\Http\Controllers\Patient\DashboardController as PatientDashboardController;
 use App\Http\Controllers\Patient\HistoryController as PatientHistoryController;
 use App\Http\Controllers\Patient\PracticeController as PatientPracticeController;
+use App\Http\Controllers\Patient\PracticeDetectionController as PatientPracticeDetectionController;
+use App\Http\Controllers\Patient\PracticeSessionController as PatientPracticeSessionController;
 use App\Http\Controllers\Patient\PrescriptionController as PatientPrescriptionController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Auth;
@@ -60,6 +62,10 @@ Route::middleware(['auth', 'verified', 'role:patient'])
         Route::get('/dashboard', [PatientDashboardController::class, 'index'])->name('dashboard');
         Route::get('/prescriptions/{prescription}', [PatientPrescriptionController::class, 'show'])->name('prescriptions.show');
         Route::get('/practice/{prescription}', [PatientPracticeController::class, 'show'])->name('practice.show');
+        Route::post('/practice/{prescription}/sessions', [PatientPracticeSessionController::class, 'start'])->name('practice.start');
+        Route::post('/practice/sessions/{session}/detect', [PatientPracticeDetectionController::class, 'detect'])
+            ->middleware('throttle:practice-detect')
+            ->name('practice.detect');
         Route::get('/history', [PatientHistoryController::class, 'index'])->name('history');
     });
 

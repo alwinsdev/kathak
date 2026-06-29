@@ -1,59 +1,170 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🪔 Siddha Mudra Therapy
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A proof-of-concept platform where **doctors prescribe Siddha hasta-mudras (hand gestures) as rehabilitation therapy** and **patients practise them at home while AI verifies each gesture in real time**. Built on Laravel 11 with a clean, domain-isolated architecture.
 
-## About Laravel
+> **Status:** Functional POC — `v1.0.0-poc`. The core objective (doctor prescribes → patient practises → AI verifies → completion recorded) is fully implemented and tested.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Overview
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Manual home-exercise programmes are hard to follow and hard to verify. This POC proves that a lightweight, browser-based AI loop can confirm a patient is performing the *prescribed* mudra correctly — turning self-reported adherence into **AI-verified** completion. Verification is **server-authoritative**: the browser only streams camera frames and shows feedback; the backend decides when a session is complete.
 
-## Learning Laravel
+## Features
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+**Doctor**
+- Secure login; sees only the patients in their own panel
+- Prescribe one or more mudras with a daily schedule (time, duration, start/optional end date, notes)
+- Edit (time/duration/notes) or cancel active prescriptions
+- View each patient's adherence
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+**Patient**
+- Self-registration with doctor selection; consent-free POC scope
+- "Today's Therapy" dashboard (due mudras, completion status)
+- Prescription detail view
+- **Live AI Practice** — camera + Roboflow detection, server-tracked hold timer, automatic verification (no manual "mark done")
+- Practice history with streak and last-practice date
 
-## Laravel Sponsors
+**Platform**
+- Role-based access (doctor / patient) via policies + middleware
+- Isolated AI domain, server-authoritative verification, exactly-once completion
+- Structured logging (correlation IDs) + lightweight operational metrics
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## Technology stack
 
-### Premium Partners
+| Layer | Choice |
+|---|---|
+| Framework | Laravel 11 (PHP 8.2+) |
+| Auth | Laravel Breeze (Blade) |
+| Database | MySQL 8 / MariaDB 10.4 |
+| Frontend | Blade + Tailwind + Alpine.js, Vite |
+| AI inference | Roboflow serverless model (server-side proxy) |
+| Cache | database (POC); **Redis recommended in production** |
+| Tests / format | PHPUnit, Laravel Pint |
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## Folder structure (high level)
 
-## Contributing
+```
+app/
+├── Actions/                 # RegisterPatient
+├── DTOs/                    # patient-facing view DTOs (TodayTherapy, HistoryStats, …)
+├── Domain/AI/               # isolated AI domain
+│   ├── Actions/             #   VerifyPracticeAction (pure)
+│   ├── Clients/             #   RoboflowInferenceClient, FakeInferenceClient
+│   ├── Contracts/           #   InferenceClient, MetricsRecorder
+│   ├── DTOs/                #   InferenceResult, DetectionResult, HoldProgress, MudraPrediction
+│   ├── Exceptions/          #   InferenceException
+│   ├── Metrics/             #   AiMetric
+│   └── Services/            #   PracticeSessionService, PracticeHoldTracker, CacheMetricsRecorder
+├── Enums/                   # Role, Gender, PrescriptionStatus, PracticeStatus
+├── Events/ · Listeners/     # PatientRegistered, PrescriptionCreated, PracticeVerified (+ log listeners)
+├── Http/{Controllers,Requests,Middleware}/   # thin controllers, Form Requests, EnsureRole
+├── Models/ · Policies/ · Providers/ · Repositories/
+config/practice.php          # all AI tunables
+database/{migrations,seeders,factories}
+resources/js/practice/{camera,detector,overlay,practice}.js   # modular camera/AI JS
+resources/views/{doctor,patient,layouts,components}/
+docs/                        # architecture, standards, deployment, QA, release
+```
+Full detail: [docs/PROJECT-STRUCTURE.md](docs/PROJECT-STRUCTURE.md).
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Installation
 
-## Code of Conduct
+```bash
+git clone <repo> kathak && cd kathak
+composer install
+npm install
+cp .env.example .env
+php artisan key:generate
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+# create the database (MySQL/MariaDB)
+mysql -u root -e "CREATE DATABASE siddha_mudra CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
-## Security Vulnerabilities
+php artisan migrate --seed
+npm run build        # or: npm run dev
+php artisan serve    # http://127.0.0.1:8000
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+> Camera + browser notifications require **HTTPS** or `http://localhost`.
+
+## Environment configuration
+
+Key `.env` values (see `.env.example` for all):
+
+```env
+APP_NAME="Siddha Mudra Therapy"
+DB_CONNECTION=mysql
+DB_DATABASE=siddha_mudra
+DB_USERNAME=root
+DB_PASSWORD=
+
+# Roboflow (server-side only — never exposed to the browser)
+ROBOFLOW_API_KEY=
+ROBOFLOW_MODEL_URL=https://serverless.roboflow.com/kathak-trainer/8
+```
+
+## AI configuration
+
+All AI behaviour is config-driven in [config/practice.php](config/practice.php) (overridable via `.env`):
+
+| Key | Default | Purpose |
+|---|---|---|
+| `confidence_threshold` | 0.75 | min confidence for a match |
+| `hold_seconds` | 5 | how long the correct mudra must be held |
+| `detection_interval_ms` | 1000 | frame sampling interval |
+| `hold_grace_factor` | 2.5 | jitter tolerance before the hold restarts |
+| `hold_cache_ttl` | 300 | TTL of cached hold state |
+| `max_image_kb` | 2048 | max frame upload size |
+| `jpeg_quality` | 0.7 | browser JPEG encode quality |
+| `detect_rate_limit_per_minute` | 120 | per-user detect throttle |
+| `inference_timeout` | 15 | inference HTTP timeout (s) |
+| `history_limit` | 20 | recent sessions on history page |
+
+## Demo credentials
+
+After `migrate --seed` (password for all: `password`):
+
+| Role | Email |
+|---|---|
+| Doctor | `anjali@kathak.test`, `ravi@kathak.test` |
+| Patient | `patient@kathak.test` |
+
+## Running tests
+
+```bash
+php artisan test          # full suite
+./vendor/bin/pint --test  # code style check
+```
+
+## Running Vite
+
+```bash
+npm run dev     # dev server / HMR
+npm run build   # production assets (run after adding new Tailwind classes)
+```
+
+## Screenshots
+
+_Add screenshots here:_
+- `docs/screenshots/doctor-dashboard.png`
+- `docs/screenshots/prescribe.png`
+- `docs/screenshots/patient-today.png`
+- `docs/screenshots/practice-live.png`
+- `docs/screenshots/history.png`
+
+## Future roadmap
+
+Deferred enhancements (documented, not in the POC):
+- **RP1** — dedicated `inference` log channel (separate high-volume telemetry from the audit log)
+- **RP2** — Redis cache backend in production (see [Deployment Guide](docs/DEPLOYMENT-GUIDE.md))
+- **RP3** — DB uniqueness on `(prescription_id, practiced_on)` to harden session-per-day
+- Per-prescription threshold/hold overrides; abandon/timeout handling + `verification_timeout` metric
+- Reminders/notifications; reporting & analytics dashboards; richer scheduling
+
+## Documentation
+
+See [docs/README.md](docs/README.md) for the full documentation index.
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Proprietary — proof of concept.
