@@ -28,6 +28,7 @@ class PracticeSessionController extends Controller
         return response()->json([
             'session_id' => $session->id,
             'verified' => $session->status === PracticeStatus::Verified,
+            'started_at' => optional($session->started_at)->format('h:i A'),
         ]);
     }
 }

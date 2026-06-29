@@ -93,6 +93,7 @@ class PracticeDetectionController extends Controller
             'matched' => true,
             'confidence' => (float) ($session->best_confidence ?? 1.0),
             'detected_class' => $session->detected_class,
+            'top_confidence' => (float) ($session->best_confidence ?? 1.0),
             'processing_time_ms' => 0,
             'predictions' => [],
             'held_seconds' => (float) $holdSeconds,

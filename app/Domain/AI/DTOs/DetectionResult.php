@@ -20,6 +20,7 @@ readonly class DetectionResult
         public bool $matched,
         public float $confidence,
         public ?string $detectedClass,
+        public float $topConfidence,
         public array $predictions,
         public int $processingMs,
     ) {}
@@ -33,6 +34,7 @@ readonly class DetectionResult
             'matched' => $this->matched,
             'confidence' => $this->confidence,
             'detected_class' => $this->detectedClass,
+            'top_confidence' => $this->topConfidence,
             'processing_time_ms' => $this->processingMs,
             'predictions' => array_map(fn (MudraPrediction $p) => $p->toArray(), $this->predictions),
         ];

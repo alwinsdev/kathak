@@ -10,14 +10,13 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 
 /**
- * Owns the verification hold timer. Server-authoritative and cache-backed:
+ * Owns the verification hold timer. Server-authoritative and cache-backed.
  *
- *  - accumulates held time across consecutive matched frames (server clock),
- *  - applies a grace window so brief jitter doesn't break the hold,
- *  - restarts when a frame doesn't match or a long gap occurs,
- *  - reports when the required hold has been reached (readiness).
- *
- * It stores only transient progress in the cache; it never touches the DB.
+ * Each matched frame credits the time since the previous matched frame, but a
+ * single credit is capped (the "grace step") so that slow inference or a dropped
+ * frame can never reset the hold — only a frame that does NOT match the target
+ * resets it. This keeps the hold intuitive ("keep showing the mudra and the bar
+ * fills") even though inference latency makes frames arrive a few seconds apart.
  */
 class PracticeHoldTracker
 {
@@ -33,13 +32,15 @@ class PracticeHoldTracker
 
         $now = $this->nowMs();
         $state = Cache::get($this->key($session));
-        $maxGapMs = (int) round(((int) config('practice.detection_interval_ms')) * ((float) config('practice.hold_grace_factor')));
 
-        if (is_array($state) && ($now - $state['last']) <= $maxGapMs) {
-            $accumulatedMs = $state['accumulated'] + ($now - $state['last']);
+        // Cap a single credit so a long gap (slow inference / one dropped frame)
+        // contributes a bounded amount rather than resetting progress.
+        $maxStepMs = (int) round(((int) config('practice.detection_interval_ms')) * ((float) config('practice.hold_grace_factor')));
+
+        if (is_array($state)) {
+            $accumulatedMs = $state['accumulated'] + min($now - $state['last'], $maxStepMs);
         } else {
-            // First matched frame, or the gap exceeded the grace window: restart.
-            $accumulatedMs = 0;
+            $accumulatedMs = 0; // first matched frame starts the hold
         }
 
         $bestConfidence = max($state['best'] ?? 0.0, $confidence);

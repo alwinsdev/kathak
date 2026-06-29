@@ -21,8 +21,12 @@ class PracticeController extends Controller
 
         $prescription->load('mudra');
 
+        $guide = config('mudra_guides.'.$prescription->mudra->ai_class_label)
+            ?? config('mudra_guides.default');
+
         return view('patient.practice.show', [
             'prescription' => $prescription,
+            'guide' => $guide,
             'practiceConfig' => [
                 'holdSeconds' => (int) config('practice.hold_seconds'),
                 'detectionIntervalMs' => (int) config('practice.detection_interval_ms'),

@@ -66,16 +66,17 @@ class PracticeHoldTrackerTest extends TestCase
         $this->assertSame(0.0, $this->tracker->record($this->session, true, 0.9)->heldSeconds);
     }
 
-    public function test_hold_restarts_when_gap_exceeds_grace_window(): void
+    public function test_a_long_gap_credits_a_capped_step_rather_than_resetting(): void
     {
         Carbon::setTestNow(Carbon::create(2026, 6, 29, 8, 0, 0));
         $this->tracker->record($this->session, true, 0.9);
         Carbon::setTestNow(now()->addSecond());
         $this->assertSame(1.0, $this->tracker->record($this->session, true, 0.9)->heldSeconds);
 
-        // Jump beyond maxGap (2500ms) → the hold restarts rather than crediting it.
-        Carbon::setTestNow(now()->addSeconds(4));
-        $this->assertSame(0.0, $this->tracker->record($this->session, true, 0.9)->heldSeconds);
+        // A long gap (slow inference / dropped frame) credits at most the grace
+        // step (interval 1000ms × 2.5 = 2500ms), and never resets the hold.
+        Carbon::setTestNow(now()->addSeconds(10));
+        $this->assertSame(3.5, $this->tracker->record($this->session, true, 0.9)->heldSeconds);
     }
 
     protected function tearDown(): void

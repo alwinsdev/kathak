@@ -52,11 +52,11 @@ class VerifyPracticeAction
         $processingMs = $this->elapsedMs($startedAt);
         $confidence = $target !== '' ? $result->confidenceFor($target) : 0.0;
         $matched = $confidence >= $threshold;
-        $detectedClass = $result->topClass();
+        $top = $result->topPrediction();
 
         Log::channel('business')->info('inference_success', $context + [
             'processing_time_ms' => $processingMs,
-            'detected_class' => $detectedClass,
+            'detected_class' => $top?->class,
             'confidence' => $confidence,
             'matched' => $matched,
         ]);
@@ -64,7 +64,8 @@ class VerifyPracticeAction
         return new DetectionResult(
             matched: $matched,
             confidence: $confidence,
-            detectedClass: $detectedClass,
+            detectedClass: $top?->class,
+            topConfidence: $top?->confidence ?? 0.0,
             predictions: $result->predictions,
             processingMs: $processingMs,
         );
