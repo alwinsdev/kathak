@@ -20,6 +20,10 @@ Authoritative documentation for the POC (`v1.0.0-poc`).
 - [PRODUCTION-READINESS-REVIEW.md](PRODUCTION-READINESS-REVIEW.md) — evidence-based audit (L1–L4), scores, refactor proposals
 - [RELEASE-v1.0.0-poc.md](RELEASE-v1.0.0-poc.md) — final release summary: architecture, schema, API, tests, statistics, roadmap
 
+## V2 — AI engine evolution (branch `feature/yolov11-ai`)
+- [V2-AI-ARCHITECTURE-REVIEW.md](V2-AI-ARCHITECTURE-REVIEW.md) — **authoritative V2 AI blueprint**: evidence-based comparison of YOLO / MediaPipe / ViT / CNN / two-stage; recommends **MediaPipe Hands landmarks + lightweight classifier** (not YOLO) for fine mudra discrimination + explainable feedback
+- [V2-YOLOV11-DESIGN.md](V2-YOLOV11-DESIGN.md) — earlier YOLOv11+FastAPI design; retained as "Option 1, evaluated" (engine choice superseded by the review above; FastAPI/integration/migration patterns still apply)
+
 ## Archive
 - [archive/](archive/) — superseded pre-POC enterprise planning docs (00–07, M0), kept for history only
 
