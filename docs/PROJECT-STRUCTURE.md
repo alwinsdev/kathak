@@ -111,6 +111,34 @@ kathak/
 ## Quality gate at L1
 - ✅ 31 tests passing (77 assertions) · ✅ Pint clean · ✅ public pages 200 · ✅ role isolation verified.
 
+---
+
+## 🔒 L2 — Prescription Management (frozen · tag `v0.2.0-l2`)
+L2 is **frozen**: no structural/functional changes except bug fixes.
+
+**Added**
+- Table `prescriptions` (patient_id, doctor_id, mudra_id, scheduled_time, duration_min, `start_date`, notes, `status`). Verification tuning (hold/confidence) is **not** stored — read from `config/practice.php`.
+- `App\Enums\PrescriptionStatus` (active/completed/expired/cancelled; only `active` used).
+- `App\Models\Prescription` (+ additive `User::prescriptions()` patient relation).
+- `App\Policies\PrescriptionPolicy` (update/delete = owner + active) and `manage-patient` Gate (`AppServiceProvider`).
+- `App\Http\Requests\Doctor\{Store,Update}PrescriptionRequest`.
+- `App\Services\Prescription\PrescriptionService` (create / update / cancel).
+- Controllers: `Doctor\DashboardController` (real, own-panel), `Doctor\PatientController@show`, `Doctor\PrescriptionController` (store/update/destroy).
+- Views: `doctor/dashboard` (panel list), `doctor/patients/show` (info + add form + active list with Alpine inline edit).
+- `PrescriptionSeeder` (demo patient → Pataka 08:00, Mushti 18:00).
+
+**Routes (added, `role:doctor`)**
+| Method | URI | Name |
+|---|---|---|
+| GET | `/doctor/patients/{patient}` | `doctor.patients.show` |
+| POST | `/doctor/patients/{patient}/prescriptions` | `doctor.prescriptions.store` |
+| PUT | `/doctor/prescriptions/{prescription}` | `doctor.prescriptions.update` (time/duration/notes only) |
+| DELETE | `/doctor/prescriptions/{prescription}` | `doctor.prescriptions.destroy` (cancel) |
+
+**Rules:** doctor acts only within their own panel (Gate + Policy → 403 otherwise); edits/cancels allowed only on `active` prescriptions; mudra & start_date immutable after creation.
+
+**Quality gate at L2:** ✅ 44 tests (113 assertions) · ✅ Pint clean · ✅ assets built · ✅ end-to-end smoke verified.
+
 ## Demo accounts (seeded; password `password`)
 | Role | Email |
 |---|---|

@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Doctor\DashboardController as DoctorDashboardController;
+use App\Http\Controllers\Doctor\PatientController as DoctorPatientController;
+use App\Http\Controllers\Doctor\PrescriptionController as DoctorPrescriptionController;
 use App\Http\Controllers\Patient\DashboardController as PatientDashboardController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Auth;
@@ -35,6 +37,12 @@ Route::middleware(['auth', 'verified', 'role:doctor'])
     ->name('doctor.')
     ->group(function () {
         Route::get('/dashboard', [DoctorDashboardController::class, 'index'])->name('dashboard');
+
+        Route::get('/patients/{patient}', [DoctorPatientController::class, 'show'])->name('patients.show');
+
+        Route::post('/patients/{patient}/prescriptions', [DoctorPrescriptionController::class, 'store'])->name('prescriptions.store');
+        Route::put('/prescriptions/{prescription}', [DoctorPrescriptionController::class, 'update'])->name('prescriptions.update');
+        Route::delete('/prescriptions/{prescription}', [DoctorPrescriptionController::class, 'destroy'])->name('prescriptions.destroy');
     });
 
 /*

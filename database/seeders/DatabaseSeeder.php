@@ -45,5 +45,8 @@ class DatabaseSeeder extends Seeder
                 'condition_notes' => 'Post-stroke finger stiffness.',
             ],
         );
+
+        // Demo prescriptions depend on the demo patient + their doctor existing.
+        $this->call(PrescriptionSeeder::class);
     }
 }

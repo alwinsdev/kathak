@@ -75,6 +75,16 @@ class User extends Authenticatable
         return $this->hasMany(PatientProfile::class, 'doctor_id');
     }
 
+    /**
+     * Prescriptions written for this user as a patient.
+     *
+     * @return HasMany<Prescription, $this>
+     */
+    public function prescriptions(): HasMany
+    {
+        return $this->hasMany(Prescription::class, 'patient_id');
+    }
+
     public function isDoctor(): bool
     {
         return $this->role === Role::Doctor;
