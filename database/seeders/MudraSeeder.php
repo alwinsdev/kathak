@@ -28,7 +28,7 @@ class MudraSeeder extends Seeder
             ['name' => 'Mayura', 'ai' => 'mayur', 'description' => 'Ring finger touches thumb tip, others extended.', 'benefits' => 'Calming, improves focus.'],
             ['name' => 'Ardhachandra', 'ai' => 'ardhachandra', 'description' => 'Hand in crescent shape, thumb stretched out.', 'benefits' => 'Stretches palm & opens chest posture.'],
             ['name' => 'Arala', 'ai' => 'aral', 'description' => 'Index curved, others slightly bent.', 'benefits' => 'Loosens stiff fingers.'],
-            ['name' => 'Shukatunda', 'ai' => 'shuktund', 'description' => 'Like Arala but ring finger also curved.', 'benefits' => 'Targets joint stiffness.'],
+            ['name' => 'Shukatunda', 'ai' => 'shuktund', 'description' => 'Open hand with fingers spread apart, facing the camera.', 'benefits' => 'Targets joint stiffness & finger spread.'],
             ['name' => 'Mushti', 'ai' => 'mushti', 'description' => 'Closed fist with thumb on top.', 'benefits' => 'Builds grip strength.'],
             ['name' => 'Shikhara', 'ai' => 'shikhar', 'description' => 'Closed fist held up, facing the camera.', 'benefits' => 'Stabilizes wrist, builds strength.'],
         ];

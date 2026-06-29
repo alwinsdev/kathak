@@ -26,8 +26,8 @@ class PrescriptionSeeder extends Seeder
         $doctorId = $patient->patientProfile->doctor_id;
 
         $plan = [
-            ['mudra' => 'pataka', 'time' => '08:00', 'duration' => 10, 'notes' => 'Morning warm-up, 5 reps.'],
-            ['mudra' => 'shikhara', 'time' => '12:00', 'duration' => 10, 'notes' => 'Make a closed fist facing the camera and hold it steady.'],
+            ['mudra' => 'shikhara', 'time' => '08:00', 'duration' => 10, 'notes' => 'Make a closed fist facing the camera and hold it steady.'],
+            ['mudra' => 'shukatunda', 'time' => '12:00', 'duration' => 10, 'notes' => 'Open your hand, spread all fingers, face the palm to the camera.'],
             ['mudra' => 'mushti', 'time' => '18:00', 'duration' => 15, 'notes' => 'Evening grip strength.'],
         ];
 

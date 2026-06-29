@@ -139,4 +139,15 @@ return [
         'mistakes' => ['Thumb not stretched out', 'Fingers spread apart', 'Hand tilted'],
     ],
 
+    'shuktund' => [
+        'symbol' => '🖐️',
+        'steps' => [
+            'Open your hand fully.',
+            'Spread all five fingers apart.',
+            'Face your open palm towards the camera.',
+            'Hold steady until the bar fills.',
+        ],
+        'mistakes' => ['Fingers held together', 'Hand turned sideways', 'Hand too far / out of frame'],
+    ],
+
 ];

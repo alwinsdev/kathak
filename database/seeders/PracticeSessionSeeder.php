@@ -27,10 +27,11 @@ class PracticeSessionSeeder extends Seeder
 
         $prescriptions = $patient->prescriptions()->active()->with('mudra')->get()->keyBy(fn ($p) => $p->mudra->slug);
 
-        // Morning Pataka: verified for the last 5 days including today (gives a streak).
-        $this->seedDays($patient, $prescriptions->get('pataka'), range(0, 4));
+        // Shikhara: verified on the previous 5 days (NOT today) so the patient
+        // can verify it live today, while history/streak still have data.
+        $this->seedDays($patient, $prescriptions->get('shikhara'), range(1, 5));
 
-        // Evening Mushti: verified on a few earlier days, but not today.
+        // Mushti: verified on a few earlier days, but not today.
         $this->seedDays($patient, $prescriptions->get('mushti'), [1, 2, 4]);
     }
 
