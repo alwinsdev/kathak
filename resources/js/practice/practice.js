@@ -136,7 +136,7 @@ function boot() {
                 loop = new DetectionLoop(camera, detectUrl, {
                     intervalMs,
                     onResult: handleResult,
-                    onError: () => setStatus('Reconnecting…'),
+                    onError: (error) => setStatus(error?.message ? `⚠ ${error.message}` : 'Reconnecting…'),
                 });
                 loop.start();
                 setStatus(`Camera ready. Show your ${target} mudra.`);

@@ -78,7 +78,14 @@ export class DetectionLoop {
         });
 
         if (!response.ok) {
-            this.onError?.(new Error(`Detection failed (${response.status})`));
+            let message = `Detection failed (HTTP ${response.status})`;
+            try {
+                const body = await response.json();
+                if (body?.message) message = body.message;
+            } catch {
+                // non-JSON error body; keep the generic message
+            }
+            this.onError?.(new Error(message), response.status);
             return;
         }
 

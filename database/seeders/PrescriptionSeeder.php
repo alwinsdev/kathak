@@ -27,6 +27,7 @@ class PrescriptionSeeder extends Seeder
 
         $plan = [
             ['mudra' => 'pataka', 'time' => '08:00', 'duration' => 10, 'notes' => 'Morning warm-up, 5 reps.'],
+            ['mudra' => 'shikhara', 'time' => '12:00', 'duration' => 10, 'notes' => 'Closed fist, thumb pointing up; hold steadily.'],
             ['mudra' => 'mushti', 'time' => '18:00', 'duration' => 15, 'notes' => 'Evening grip strength.'],
         ];
 
