@@ -1,0 +1,59 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Repositories;
+
+use App\Models\PracticeSession;
+use App\Models\User;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
+
+class PracticeSessionRepository
+{
+    /**
+     * Prescription ids the patient has a verified session for on the given date.
+     *
+     * @return Collection<int, int>
+     */
+    public function verifiedPrescriptionIdsOn(User $patient, Carbon $date): Collection
+    {
+        return PracticeSession::query()
+            ->where('patient_id', $patient->id)
+            ->verified()
+            ->whereDate('practiced_on', $date)
+            ->pluck('prescription_id')
+            ->unique()
+            ->values();
+    }
+
+    /**
+     * All of the patient's verified sessions (used for history statistics).
+     *
+     * @return Collection<int, PracticeSession>
+     */
+    public function verifiedFor(User $patient): Collection
+    {
+        return PracticeSession::query()
+            ->where('patient_id', $patient->id)
+            ->verified()
+            ->get();
+    }
+
+    /**
+     * The patient's most recent verified sessions, newest first.
+     *
+     * @return Collection<int, PracticeSession>
+     */
+    public function recentVerified(User $patient, int $limit): Collection
+    {
+        return PracticeSession::query()
+            ->where('patient_id', $patient->id)
+            ->verified()
+            ->with('prescription.mudra')
+            ->orderByDesc('practiced_on')
+            ->orderByDesc('completed_at')
+            ->limit($limit)
+            ->get();
+    }
+}

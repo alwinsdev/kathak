@@ -10,6 +10,14 @@ use App\Models\User;
 class PrescriptionPolicy
 {
     /**
+     * A patient may view only their own prescription (detail / practice entry).
+     */
+    public function view(User $user, Prescription $prescription): bool
+    {
+        return $user->isPatient() && $prescription->patient_id === $user->id;
+    }
+
+    /**
      * A doctor may update a prescription only if they own it and it is active.
      */
     public function update(User $user, Prescription $prescription): bool

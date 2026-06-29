@@ -17,7 +17,7 @@ class StorePrescriptionRequest extends FormRequest
     {
         $patient = $this->route('patient');
 
-        return $patient instanceof User && $this->user()->can('manage-patient', $patient);
+        return $patient instanceof User && $this->user()->can('manage', $patient);
     }
 
     /**

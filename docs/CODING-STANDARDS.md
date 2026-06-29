@@ -118,3 +118,10 @@ For every module:
 - [ ] No hardcoded secrets or magic values.
 - [ ] Pint-clean; tests for the module pass.
 - [ ] Reviewed and approved by owner.
+
+## 12. Established patterns (as of L3 — follow these going forward)
+- **Repositories** (`app/Repositories/`) wrap non-trivial/reused queries; services depend on them (constructor injection). Don't wrap trivial single-line queries.
+- **DTOs** (`app/DTOs/`, `readonly` classes) are the return type for service "view data" — never return associative arrays from services to controllers/views.
+- **Authorization = Policies** (`app/Policies/`), resolved by convention and invoked via `Gate::authorize()` / `$user->can()`. Reserve `Gate::define()` for abilities that genuinely don't map to a model.
+- **Domain events** (`app/Events/`) are dispatched at significant business moments; **listeners** (`app/Listeners/`) handle side-effects. Important business points are logged structured to the `business` log channel.
+- **Reusable Blade components** (`<x-card>`, `<x-badge>`, `<x-stat-card>`, `<x-alert>`) — extract repeated UI rather than duplicating Tailwind clusters.

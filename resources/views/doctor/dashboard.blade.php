@@ -48,9 +48,7 @@
                                         {{ $patient->patientProfile?->condition_notes ?: '—' }}
                                     </td>
                                     <td class="px-6 py-4">
-                                        <span class="inline-flex items-center rounded-full bg-teal-50 px-2.5 py-0.5 text-xs font-semibold text-teal-700">
-                                            {{ $patient->active_prescriptions_count }}
-                                        </span>
+                                        <x-badge color="teal">{{ $patient->active_prescriptions_count }}</x-badge>
                                     </td>
                                     <td class="px-6 py-4 text-right">
                                         <a href="{{ route('doctor.patients.show', $patient) }}"

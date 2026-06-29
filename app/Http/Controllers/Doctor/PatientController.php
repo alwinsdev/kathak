@@ -17,7 +17,7 @@ class PatientController extends Controller
      */
     public function show(User $patient): View
     {
-        Gate::authorize('manage-patient', $patient);
+        Gate::authorize('manage', $patient);
 
         $patient->load('patientProfile.doctor');
 

@@ -48,5 +48,8 @@ class DatabaseSeeder extends Seeder
 
         // Demo prescriptions depend on the demo patient + their doctor existing.
         $this->call(PrescriptionSeeder::class);
+
+        // Demo practice sessions depend on the demo prescriptions existing.
+        $this->call(PracticeSessionSeeder::class);
     }
 }

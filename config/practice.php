@@ -26,4 +26,13 @@ return [
     // Maximum accepted frame upload size (kilobytes).
     'max_image_kb' => (int) env('PRACTICE_MAX_IMAGE_KB', 2048),
 
+    /*
+    |--------------------------------------------------------------------------
+    | History
+    |--------------------------------------------------------------------------
+    */
+
+    // How many recent practice sessions the history page lists.
+    'history_limit' => (int) env('PRACTICE_HISTORY_LIMIT', 20),
+
 ];

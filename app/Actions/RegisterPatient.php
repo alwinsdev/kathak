@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions;
 
 use App\Enums\Role;
+use App\Events\PatientRegistered;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -34,6 +35,8 @@ class RegisterPatient
                 'phone' => $data['phone'] ?? null,
                 'condition_notes' => $data['condition_notes'] ?? null,
             ]);
+
+            PatientRegistered::dispatch($user);
 
             return $user;
         });

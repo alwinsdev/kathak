@@ -139,6 +139,27 @@ L2 is **frozen**: no structural/functional changes except bug fixes.
 
 **Quality gate at L2:** ✅ 44 tests (113 assertions) · ✅ Pint clean · ✅ assets built · ✅ end-to-end smoke verified.
 
+---
+
+## 🔒 L3 — Patient Module + Architecture Refinements (frozen · tag `v0.3.0-l3`)
+L3 is **frozen**: no structural/functional changes except bug fixes.
+
+**Patient features**
+- `practice_sessions` table (read model; L4 writes it via AI verification) + `App\Enums\PracticeStatus`.
+- `prescriptions.end_date` (nullable, via new migration — L2 migration untouched). "Active today" = `status=active` AND `start_date ≤ today` AND (`end_date` null OR `today ≤ end_date`) — `Prescription::scopeActiveOn`.
+- Patient screens: dashboard ("Today's Therapy"), prescription detail, **placeholder** practice page (real screen in L4), history (sessions + streak + **Last Practice Date**).
+- Routes `patient.{prescriptions.show, practice.show, history}`; nav "History" link.
+
+**Architecture patterns introduced (apply going forward)**
+- **Repositories** (`app/Repositories/`): `PrescriptionRepository`, `PracticeSessionRepository` — data access for the patient services.
+- **DTOs** (`app/DTOs/`): `TodayTherapy`, `TodaySummary`, `DueMudra`, `HistoryStats` — services return typed objects, not associative arrays.
+- **Policies replace ad-hoc gates**: `PrescriptionPolicy@view` (patient owns), `UserPolicy@manage` (doctor owns patient). The `manage-patient` / `view-own-prescription` gates were removed.
+- **Domain events** (`app/Events/`): `PatientRegistered`, `PrescriptionCreated`, `PracticeVerified` (last dispatched in L4) → **listeners** (`app/Listeners/`) write **structured logs** to the `business` log channel.
+- **Config, not constants**: `config/practice.php` now also holds `history_limit`.
+- **Reusable Blade components**: `<x-card>`, `<x-badge>` (plus existing `<x-stat-card>`, `<x-alert>`) applied across patient + doctor views.
+
+**Quality gate at L3:** ✅ 61 tests (150 assertions) · ✅ Pint clean · ✅ assets built · ✅ patient e2e smoke verified.
+
 ## Demo accounts (seeded; password `password`)
 | Role | Email |
 |---|---|

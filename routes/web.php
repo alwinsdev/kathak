@@ -6,6 +6,9 @@ use App\Http\Controllers\Doctor\DashboardController as DoctorDashboardController
 use App\Http\Controllers\Doctor\PatientController as DoctorPatientController;
 use App\Http\Controllers\Doctor\PrescriptionController as DoctorPrescriptionController;
 use App\Http\Controllers\Patient\DashboardController as PatientDashboardController;
+use App\Http\Controllers\Patient\HistoryController as PatientHistoryController;
+use App\Http\Controllers\Patient\PracticeController as PatientPracticeController;
+use App\Http\Controllers\Patient\PrescriptionController as PatientPrescriptionController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -55,6 +58,9 @@ Route::middleware(['auth', 'verified', 'role:patient'])
     ->name('patient.')
     ->group(function () {
         Route::get('/dashboard', [PatientDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/prescriptions/{prescription}', [PatientPrescriptionController::class, 'show'])->name('prescriptions.show');
+        Route::get('/practice/{prescription}', [PatientPracticeController::class, 'show'])->name('practice.show');
+        Route::get('/history', [PatientHistoryController::class, 'index'])->name('history');
     });
 
 require __DIR__.'/auth.php';

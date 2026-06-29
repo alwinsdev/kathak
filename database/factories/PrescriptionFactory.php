@@ -27,6 +27,7 @@ class PrescriptionFactory extends Factory
             'scheduled_time' => fake()->time('H:i'),
             'duration_min' => fake()->numberBetween(5, 30),
             'start_date' => now()->toDateString(),
+            'end_date' => null,
             'notes' => fake()->optional()->sentence(),
             'status' => PrescriptionStatus::Active,
         ];

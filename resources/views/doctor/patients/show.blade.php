@@ -24,8 +24,7 @@
             @endif
 
             {{-- Patient info --}}
-            <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-                <h3 class="mb-4 font-semibold text-gray-800">{{ __('Patient Information') }}</h3>
+            <x-card :title="__('Patient Information')">
                 <div class="grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
                     <div>
                         <div class="text-xs uppercase tracking-wide text-gray-500">{{ __('Age') }}</div>
@@ -50,13 +49,12 @@
                         <div class="mt-1 text-gray-700">{{ $patient->patientProfile->condition_notes }}</div>
                     </div>
                 @endif
-            </div>
+            </x-card>
 
             <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
 
                 {{-- Add prescription --}}
-                <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-                    <h3 class="mb-4 font-semibold text-gray-800">{{ __('Add Prescription') }}</h3>
+                <x-card :title="__('Add Prescription')">
                     <form method="POST" action="{{ route('doctor.prescriptions.store', $patient) }}" class="space-y-4">
                         @csrf
 
@@ -104,12 +102,10 @@
 
                         <x-primary-button>{{ __('Assign Mudra') }}</x-primary-button>
                     </form>
-                </div>
+                </x-card>
 
                 {{-- Active prescriptions --}}
-                <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-                    <h3 class="mb-4 font-semibold text-gray-800">{{ __('Active Prescriptions') }}</h3>
-
+                <x-card :title="__('Active Prescriptions')">
                     @if ($prescriptions->isEmpty())
                         <p class="py-8 text-center text-sm text-gray-500">{{ __('No active prescriptions yet.') }}</p>
                     @else
@@ -184,7 +180,7 @@
                             @endforeach
                         </ul>
                     @endif
-                </div>
+                </x-card>
             </div>
         </div>
     </div>
