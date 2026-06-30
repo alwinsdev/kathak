@@ -78,8 +78,26 @@
                     </x-card>
                 </div>
 
-                {{-- RIGHT: detection, progress, session --}}
+                {{-- RIGHT: target, detection, progress, session --}}
                 <div class="space-y-6">
+                    {{-- Target mudra: a clear picture of the shape to mirror --}}
+                    <x-card>
+                        <div class="text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Make this shape') }}</div>
+                        <div class="mt-3 flex flex-col items-center text-center">
+                            <div class="flex h-32 w-32 items-center justify-center rounded-2xl bg-teal-50 p-3 ring-1 ring-teal-100">
+                                @if ($prescription->mudra->reference_image_path)
+                                    <img src="{{ asset($prescription->mudra->reference_image_path) }}"
+                                         alt="{{ $prescription->mudra->name }}" class="h-full w-full object-contain">
+                                @else
+                                    <span class="text-6xl">{{ $guide['symbol'] }}</span>
+                                @endif
+                            </div>
+                            <div class="mt-3 text-lg font-semibold text-gray-900">{{ $prescription->mudra->name }}</div>
+                            <p class="mt-1 text-sm text-gray-500">{{ $prescription->mudra->description }}</p>
+                            <p class="mt-2 text-xs text-gray-400">{{ __('Mirror this with your hand and hold steady.') }}</p>
+                        </div>
+                    </x-card>
+
                     {{-- Detection status --}}
                     <x-card>
                         <h3 class="font-semibold text-gray-800">{{ __('Detection Status') }}</h3>
@@ -113,18 +131,6 @@
                             <button id="practice-stop" class="hidden w-full rounded-md border border-gray-300 px-4 py-2.5 font-medium text-gray-700 hover:bg-gray-50">
                                 ⏹ {{ __('Stop Practice') }}
                             </button>
-                        </div>
-                    </x-card>
-
-                    {{-- Target mudra --}}
-                    <x-card>
-                        <div class="text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Target Mudra') }}</div>
-                        <div class="mt-2 flex items-center gap-3">
-                            <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-teal-50 text-3xl">{{ $guide['symbol'] }}</div>
-                            <div>
-                                <div class="font-semibold text-gray-900">{{ $prescription->mudra->name }}</div>
-                                <div class="text-xs text-gray-500">{{ $prescription->mudra->description }}</div>
-                            </div>
                         </div>
                     </x-card>
 

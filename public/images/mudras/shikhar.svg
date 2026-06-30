@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 230" role="img" aria-label="Shikhara — closed fist with thumb raised">
+  <!-- hand (skin) -->
+  <g fill="#f1c5a0">
+    <!-- thumb raised at the side (drawn first; its base is hidden by the fist) -->
+    <rect x="38" y="80" width="23" height="80" rx="11.5" transform="rotate(-9 49 120)"/>
+    <!-- fist body -->
+    <rect x="50" y="98" width="100" height="104" rx="30"/>
+    <!-- curled fingers (knuckles) across the top of the fist -->
+    <rect x="58" y="92" width="20" height="58" rx="10"/>
+    <rect x="80" y="90" width="20" height="60" rx="10"/>
+    <rect x="102" y="90" width="20" height="60" rx="10"/>
+    <rect x="124" y="92" width="20" height="58" rx="10"/>
+  </g>
+  <!-- creases: gaps between fingers + the folded-finger joint line -->
+  <g fill="none" stroke="#cd8f63" stroke-width="3" stroke-linecap="round" opacity="0.4">
+    <path d="M79,98 V150"/>
+    <path d="M101,96 V150"/>
+    <path d="M123,98 V150"/>
+    <path d="M58,128 Q101,121 144,128"/>
+    <path d="M64,150 Q101,144 140,150"/>
+  </g>
+</svg>

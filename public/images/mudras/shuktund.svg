@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 230" role="img" aria-label="Shukatunda — open hand with fingers spread">
+  <!-- hand (skin) -->
+  <g fill="#f1c5a0">
+    <!-- fingers: index, middle, ring, pinky (slightly fanned) -->
+    <path d="M59,150 L51.9,66 Q51.9,52 62,52 Q72.1,52 72.1,66 L85,150 Z"/>
+    <path d="M82.5,150 L87.5,52 Q87.5,38 98,38 Q108.5,38 108.5,52 L109.5,150 Z"/>
+    <path d="M107,150 L121.9,64 Q121.9,50 132,50 Q142.1,50 142.1,64 L133,150 Z"/>
+    <path d="M132,150 L153.4,96 Q153.4,82 162,82 Q170.6,82 170.6,96 L154,150 Z"/>
+    <!-- thumb -->
+    <path d="M70,170 L34,128 Q26,121 19,131 Q14,140 30,147 L60,185 Z"/>
+    <!-- palm -->
+    <rect x="44" y="118" width="112" height="98" rx="36"/>
+  </g>
+  <!-- finger nails -->
+  <g fill="#fae0c9">
+    <ellipse cx="62" cy="61" rx="5.4" ry="7"/>
+    <ellipse cx="98" cy="47" rx="5.4" ry="7"/>
+    <ellipse cx="132" cy="59" rx="5.4" ry="7"/>
+    <ellipse cx="162" cy="91" rx="5" ry="6.4"/>
+  </g>
+  <!-- creases / contours -->
+  <g fill="none" stroke="#cd8f63" stroke-width="3" stroke-linecap="round" opacity="0.4">
+    <path d="M58,131 Q100,121 150,132"/>
+    <path d="M72,152 Q90,182 82,204"/>
+    <path d="M66,168 Q76,158 62,150"/>
+  </g>
+</svg>
