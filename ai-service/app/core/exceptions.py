@@ -55,3 +55,14 @@ class PayloadTooLargeError(AIServiceError):
 
     status_code = 413
     code = "payload_too_large"
+
+
+class MalformedLandmarksError(AIServiceError):
+    """A detected hand does not contain the expected number of landmarks.
+
+    A server-side data-integrity guard: the perception result violated the
+    contract, so it must never be returned (or passed to a future classifier).
+    """
+
+    status_code = 500
+    code = "malformed_landmarks"

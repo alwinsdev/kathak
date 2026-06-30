@@ -1,13 +1,16 @@
-"""Prediction endpoint response schema (frozen contract as of Phase 2).
+"""Landmark endpoint response schema (frozen contract as of Phase 2).
 
-Mirrors the domain ``DetectionResult``. Later phases may add fields but must not
-break this shape — it is the contract consumed by Laravel.
+Mirrors the domain ``DetectionResult``. Carries an ``api_version`` so consumers
+can evolve safely: additive fields keep the version, breaking changes bump it.
+Later phases may add fields but must not break this shape — it is the contract
+consumed by Laravel.
 """
 
 from datetime import datetime
 
 from pydantic import BaseModel, Field
 
+from app.core.config import LANDMARK_CONTRACT_VERSION
 from app.domain.hand_landmarks.models import DetectionResult
 
 
@@ -34,7 +37,11 @@ class HandSchema(BaseModel):
     landmarks: list[LandmarkSchema]
 
 
-class PredictionResponse(BaseModel):
+class LandmarkResponse(BaseModel):
+    api_version: str = Field(
+        default=LANDMARK_CONTRACT_VERSION,
+        description="Version of the landmark response contract.",
+    )
     hands: list[HandSchema]
     hands_detected: int
     image_width: int
@@ -44,7 +51,7 @@ class PredictionResponse(BaseModel):
     correlation_id: str | None
 
     @classmethod
-    def from_domain(cls, result: DetectionResult) -> "PredictionResponse":
+    def from_domain(cls, result: DetectionResult) -> "LandmarkResponse":
         return cls(
             hands=[
                 HandSchema(

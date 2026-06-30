@@ -8,6 +8,10 @@ models inside the infrastructure layer before anything reaches the domain.
 from dataclasses import dataclass
 from datetime import datetime
 
+# A hand model emits a fixed topology of 21 landmarks. Anything else is
+# malformed perception data and must not reach the classifier.
+EXPECTED_LANDMARK_COUNT = 21
+
 
 @dataclass(frozen=True)
 class Landmark:

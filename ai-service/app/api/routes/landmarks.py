@@ -1,4 +1,7 @@
-"""Prediction endpoint (protected): a frame -> detected hand landmarks.
+"""Landmark extraction endpoint (protected): a frame -> detected hand landmarks.
+
+At this stage the service only extracts hand landmarks; it does not classify or
+recognize a mudra (later phases may add ``/classify`` or ``/recognize``).
 
 Thin: validates the upload, delegates perception to the domain service, maps the
 result to the response schema, and logs a structured (coordinate-free) line.
@@ -11,14 +14,14 @@ from app.core.exceptions import InvalidImageError, ModelNotLoadedError, PayloadT
 from app.core.logging import get_logger
 from app.core.security import require_api_key
 from app.middleware.correlation_id import get_correlation_id
-from app.schemas.prediction import PredictionResponse
+from app.schemas.landmarks import LandmarkResponse
 
-router = APIRouter(tags=["prediction"])
+router = APIRouter(tags=["landmarks"])
 logger = get_logger(__name__)
 
 
-@router.post("/predict", response_model=PredictionResponse, dependencies=[Depends(require_api_key)])
-async def predict(request: Request, image: UploadFile = File(...)) -> PredictionResponse:
+@router.post("/landmarks", response_model=LandmarkResponse, dependencies=[Depends(require_api_key)])
+async def extract_landmarks(request: Request, image: UploadFile = File(...)) -> LandmarkResponse:
     settings = get_settings()
 
     image_bytes = await image.read()
@@ -34,7 +37,7 @@ async def predict(request: Request, image: UploadFile = File(...)) -> Prediction
     result = service.detect(image_bytes, correlation_id=get_correlation_id())
 
     logger.info(
-        "prediction",
+        "landmarks",
         extra={
             "processing_time_ms": result.processing_time_ms,
             "image_width": result.image_width,
@@ -44,4 +47,4 @@ async def predict(request: Request, image: UploadFile = File(...)) -> Prediction
         },
     )
 
-    return PredictionResponse.from_domain(result)
+    return LandmarkResponse.from_domain(result)

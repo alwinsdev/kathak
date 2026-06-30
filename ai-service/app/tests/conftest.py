@@ -22,9 +22,11 @@ from app.domain.hand_landmarks.provider import HandLandmarkProvider  # noqa: E40
 from app.main import create_app  # noqa: E402
 
 
-def make_hand(handedness: str = "Right", score: float = 0.99) -> HandLandmarks:
-    """Build a synthetic hand with 21 landmarks for tests."""
-    landmarks = [Landmark(x=0.5, y=0.5, z=0.0) for _ in range(21)]
+def make_hand(
+    handedness: str = "Right", score: float = 0.99, landmark_count: int = 21
+) -> HandLandmarks:
+    """Build a synthetic hand for tests (21 landmarks by default)."""
+    landmarks = [Landmark(x=0.5, y=0.5, z=0.0) for _ in range(landmark_count)]
     return HandLandmarks(
         handedness=handedness,
         score=score,

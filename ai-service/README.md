@@ -76,11 +76,14 @@ uvicorn app.main:app --reload --port 8001
 ```
 Returns **503** with `status: unhealthy` until the model is loaded.
 
-## Prediction (Phase 2)
-`POST /predict` — **protected** (`X-API-Key`). Multipart field `image` (JPEG/PNG/WebP/BMP).
-Returns the detected hands with **21 3D landmarks**, handedness, and a bounding box:
+## Landmark extraction (Phase 2)
+`POST /landmarks` — **protected** (`X-API-Key`). Multipart field `image` (JPEG/PNG/WebP/BMP).
+This stage **only extracts hand landmarks** — it does not classify a mudra (later
+phases may add `POST /classify` or `POST /recognize`). Returns the detected hands
+with **21 3D landmarks**, handedness, and a bounding box:
 ```json
 {
+  "api_version": "1.0",
   "hands": [
     { "handedness": "Right", "score": 0.98,
       "bbox": { "cx": 320.0, "cy": 240.0, "width": 110.0, "height": 130.0 },
@@ -93,16 +96,21 @@ Returns the detected hands with **21 3D landmarks**, handedness, and a bounding 
   "correlation_id": "..."
 }
 ```
+- **`api_version`** versions the response contract: additive fields keep `"1.0"`,
+  a breaking change bumps it — so consumers can evolve safely.
+- Every detected hand is guaranteed to carry **exactly 21 landmarks**; a malformed
+  detection is rejected (`500 malformed_landmarks`) rather than returned.
 - **`bbox` is an *approximate*, center-based pixel box derived from the landmark
   extents — not a native object-detection box.** Don't assume pixel-perfect accuracy.
 - This is the **frozen contract** consumed by Laravel; later phases extend it additively.
 - Errors: `400` empty/undecodable image · `413` too large (size or dimensions) ·
-  `415` unsupported format · `401` bad/missing key · `422` missing field · `503` model not ready.
+  `415` unsupported format · `401` bad/missing key · `422` missing field ·
+  `500` malformed landmark data · `503` model not ready.
 - **Scope:** perception only — no mudra classification / explainable feedback yet.
 
 Example:
 ```bash
-curl -s -X POST http://localhost:8001/predict \
+curl -s -X POST http://localhost:8001/landmarks \
   -H "X-API-Key: $API_KEY" -F "image=@hand.jpg"
 ```
 

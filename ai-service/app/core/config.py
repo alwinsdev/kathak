@@ -8,6 +8,10 @@ SERVICE_NAME = "mediapipe-ai"
 SERVICE_VERSION = "1.0.0"
 API_VERSION = "v1"
 
+# Version of the landmark response contract (returned as `api_version`). Bumped
+# only on a breaking change to the response shape; additive fields keep "1.0".
+LANDMARK_CONTRACT_VERSION = "1.0"
+
 
 class Settings(BaseSettings):
     """Typed application settings.
