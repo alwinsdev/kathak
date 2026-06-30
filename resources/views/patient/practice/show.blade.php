@@ -43,18 +43,7 @@
                     {{-- Mudra teaching guide --}}
                     <x-card id="mudra-guide">
                         <h3 class="mb-4 font-semibold text-gray-800">{{ __('How to do') }} {{ $prescription->mudra->name }} {{ __('mudra') }}</h3>
-                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
-                            <div>
-                                <div class="text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('The shape') }}</div>
-                                <div class="mt-2 flex h-28 items-center justify-center rounded-lg bg-teal-50 text-6xl">
-                                    @if ($prescription->mudra->reference_image_path)
-                                        <img src="{{ asset($prescription->mudra->reference_image_path) }}" alt="{{ $prescription->mudra->name }}" class="h-full object-contain">
-                                    @else
-                                        <span>{{ $guide['symbol'] }}</span>
-                                    @endif
-                                </div>
-                                <p class="mt-2 text-sm text-gray-600">{{ $prescription->mudra->description }}</p>
-                            </div>
+                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                             <div>
                                 <div class="text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Steps') }}</div>
                                 <ol class="mt-2 space-y-2 text-sm text-gray-700">

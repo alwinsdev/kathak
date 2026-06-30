@@ -1,22 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 230" role="img" aria-label="Shikhara — closed fist with thumb raised">
-  <!-- hand (skin) -->
-  <g fill="#f1c5a0">
-    <!-- thumb raised at the side (drawn first; its base is hidden by the fist) -->
-    <rect x="38" y="80" width="23" height="80" rx="11.5" transform="rotate(-9 49 120)"/>
-    <!-- fist body -->
-    <rect x="50" y="98" width="100" height="104" rx="30"/>
-    <!-- curled fingers (knuckles) across the top of the fist -->
-    <rect x="58" y="92" width="20" height="58" rx="10"/>
-    <rect x="80" y="90" width="20" height="60" rx="10"/>
-    <rect x="102" y="90" width="20" height="60" rx="10"/>
-    <rect x="124" y="92" width="20" height="58" rx="10"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 280" role="img" aria-label="Shikhara — closed fist with thumb raised">
+  <!-- soft background blob -->
+  <path d="M44,150 Q30,74 112,58 Q196,44 210,128 Q222,206 138,230 Q56,250 44,150 Z" fill="#fbf1cf"/>
+  <!-- fist silhouette with thumb raised on the left -->
+  <path d="M84,236 L76,156 Q74,134 86,126 Q92,104 90,82 Q89,66 100,66 Q111,66 111,84
+           Q111,108 106,128 Q114,118 124,128 Q132,116 142,128 Q150,116 160,130 L164,156
+           Q166,200 160,222 Q154,238 124,238 Q100,240 84,236 Z"
+        fill="#f2c8a0" stroke="#c98a5e" stroke-width="3.5" stroke-linejoin="round"/>
+  <!-- folded-finger separators + fold crease -->
+  <g fill="none" stroke="#c98a5e" stroke-width="2.6" stroke-linecap="round" opacity="0.6">
+    <path d="M121,130 V172"/>
+    <path d="M139,130 V172"/>
+    <path d="M157,132 V172"/>
+    <path d="M104,150 Q134,142 162,150"/>
+    <path d="M100,176 Q134,170 160,176"/>
   </g>
-  <!-- creases: gaps between fingers + the folded-finger joint line -->
-  <g fill="none" stroke="#cd8f63" stroke-width="3" stroke-linecap="round" opacity="0.4">
-    <path d="M79,98 V150"/>
-    <path d="M101,96 V150"/>
-    <path d="M123,98 V150"/>
-    <path d="M58,128 Q101,121 144,128"/>
-    <path d="M64,150 Q101,144 140,150"/>
-  </g>
+  <!-- thumb nail -->
+  <ellipse cx="100" cy="78" rx="6" ry="8" fill="#fae3cd"/>
 </svg>

@@ -1,27 +1,26 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 230" role="img" aria-label="Shukatunda — open hand with fingers spread">
-  <!-- hand (skin) -->
-  <g fill="#f1c5a0">
-    <!-- fingers: index, middle, ring, pinky (slightly fanned) -->
-    <path d="M59,150 L51.9,66 Q51.9,52 62,52 Q72.1,52 72.1,66 L85,150 Z"/>
-    <path d="M82.5,150 L87.5,52 Q87.5,38 98,38 Q108.5,38 108.5,52 L109.5,150 Z"/>
-    <path d="M107,150 L121.9,64 Q121.9,50 132,50 Q142.1,50 142.1,64 L133,150 Z"/>
-    <path d="M132,150 L153.4,96 Q153.4,82 162,82 Q170.6,82 170.6,96 L154,150 Z"/>
-    <!-- thumb -->
-    <path d="M70,170 L34,128 Q26,121 19,131 Q14,140 30,147 L60,185 Z"/>
-    <!-- palm -->
-    <rect x="44" y="118" width="112" height="98" rx="36"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 280" role="img" aria-label="Shukatunda — open hand, fingers spread">
+  <!-- soft background blob -->
+  <path d="M44,150 Q30,74 112,58 Q196,44 210,128 Q222,206 138,230 Q56,250 44,150 Z" fill="#fbf1cf"/>
+  <!-- hand silhouette -->
+  <path d="M96,270 L88,210 Q84,196 74,188 Q50,172 40,150 Q34,140 42,134 Q52,128 64,148
+           Q74,164 92,172 Q90,120 92,70 Q93,58 102,58 Q110,58 110,72 L110,96 Q112,104 118,104
+           Q120,104 121,92 L121,60 Q121,46 131,46 Q140,46 140,60 L140,98 Q142,106 148,106
+           Q150,106 151,94 L151,64 Q151,50 160,50 Q169,50 169,64 L169,100 Q171,108 177,108
+           Q179,108 180,98 L180,80 Q180,68 188,68 Q196,68 196,82 L196,150 Q196,210 180,240
+           Q168,262 140,268 Q116,270 96,270 Z"
+        fill="#f2c8a0" stroke="#c98a5e" stroke-width="3.5" stroke-linejoin="round"/>
+  <!-- nails -->
+  <g fill="#fae3cd">
+    <ellipse cx="101" cy="69" rx="6" ry="8"/>
+    <ellipse cx="130" cy="57" rx="6.2" ry="8.4"/>
+    <ellipse cx="160" cy="61" rx="6" ry="8"/>
+    <ellipse cx="188" cy="79" rx="5.6" ry="7.4"/>
+    <ellipse cx="45" cy="142" rx="5.6" ry="7.4" transform="rotate(38 45 142)"/>
   </g>
-  <!-- finger nails -->
-  <g fill="#fae0c9">
-    <ellipse cx="62" cy="61" rx="5.4" ry="7"/>
-    <ellipse cx="98" cy="47" rx="5.4" ry="7"/>
-    <ellipse cx="132" cy="59" rx="5.4" ry="7"/>
-    <ellipse cx="162" cy="91" rx="5" ry="6.4"/>
-  </g>
-  <!-- creases / contours -->
-  <g fill="none" stroke="#cd8f63" stroke-width="3" stroke-linecap="round" opacity="0.4">
-    <path d="M58,131 Q100,121 150,132"/>
-    <path d="M72,152 Q90,182 82,204"/>
-    <path d="M66,168 Q76,158 62,150"/>
+  <!-- knuckle / palm creases -->
+  <g fill="none" stroke="#c98a5e" stroke-width="2.6" stroke-linecap="round" opacity="0.65">
+    <path d="M98,116 Q138,108 182,118"/>
+    <path d="M104,150 Q120,186 112,210"/>
+    <path d="M92,172 Q108,162 124,170"/>
   </g>
 </svg>
