@@ -40,4 +40,24 @@ return [
         'model_url' => env('ROBOFLOW_MODEL_URL'),
     ],
 
+    /*
+    | Which inference provider backs the practice workflow. 'roboflow' (default)
+    | keeps the original behaviour; 'mediapipe' uses the self-hosted AI service.
+    */
+    'inference' => [
+        'driver' => env('INFERENCE_DRIVER', 'roboflow'),
+    ],
+
+    'mediapipe' => [
+        'url' => env('MEDIAPIPE_URL', 'http://localhost:8001'),
+        'key' => env('MEDIAPIPE_API_KEY'),
+
+        // Maps the AI service's hand-shape labels to mudra classes
+        // (mudras.ai_class_label). Fully configurable — no mapping in code.
+        'label_map' => [
+            'open_palm' => 'shuktund',
+            'closed_fist' => 'shikhar',
+        ],
+    ],
+
 ];

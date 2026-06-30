@@ -1,8 +1,8 @@
 """FastAPI application factory for the MediaPipe AI service.
 
-Phase 1: foundation only — config, logging, middleware, exception handling,
-security scaffold, MediaPipe initialization (lifecycle) and a health endpoint.
-No detection, landmark extraction, classification or prediction yet.
+Wires the app: config, logging, middleware, exception handling, security, the
+MediaPipe hand-landmark provider (lifecycle), the classification service, and the
+HTTP routes (/health, /landmarks, /classify).
 """
 
 import time
@@ -12,11 +12,13 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from app.api.router import api_router
+from app.application.mudra_classifier.service import ClassificationService
 from app.core.config import SERVICE_NAME, SERVICE_VERSION, get_settings
 from app.core.exceptions import AIServiceError
 from app.core.logging import configure_logging, get_logger
 from app.domain.hand_landmarks.provider import HandLandmarkProvider
 from app.domain.hand_landmarks.service import HandLandmarkService
+from app.infrastructure.classifiers.factory import create_classifier
 from app.infrastructure.providers.mediapipe.provider import MediaPipeHandLandmarkProvider
 from app.middleware.correlation_id import CorrelationIdMiddleware, get_correlation_id
 
@@ -40,6 +42,9 @@ def create_app(provider: HandLandmarkProvider | None = None) -> FastAPI:
             # instead of the process crash-looping.
             logger.exception("Hand-landmark provider failed to initialize (degraded mode)")
         app.state.hand_landmark_service = service
+        app.state.classification_service = ClassificationService(
+            create_classifier(settings.mudra_classifier_driver)
+        )
         try:
             yield
         finally:
