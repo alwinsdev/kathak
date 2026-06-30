@@ -6,3 +6,8 @@ __pycache__/
 .ruff_cache/
 .env
 models/*.task
+# Trained weights + datasets are large / user-supplied — never commit.
+models/*.pt
+models/*.onnx
+datasets/
+runs/
