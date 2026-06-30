@@ -41,11 +41,13 @@ async def classify(request: Request, image: UploadFile = File(...)) -> ClassifyR
     detection = landmark_service.detect(image_bytes, correlation_id=correlation_id)
 
     prediction = None
+    mean_curl = None
     if detection.hands:
         result = request.app.state.classification_service.classify(
             ClassificationRequest(hand=detection.hands[0], correlation_id=correlation_id)
         )
         prediction = PredictionSchema(label=result.label, confidence=result.confidence)
+        mean_curl = result.metadata.get("mean_curl")
     processing_time_ms = int((time.perf_counter() - started) * 1000)
 
     logger.info(
@@ -54,6 +56,8 @@ async def classify(request: Request, image: UploadFile = File(...)) -> ClassifyR
             "processing_time_ms": processing_time_ms,
             "hands_detected": len(detection.hands),
             "label": prediction.label if prediction else None,
+            # Derived feature (not coordinates) — lets us tune thresholds live.
+            "mean_curl": mean_curl,
             "request_status": "success",
         },
     )

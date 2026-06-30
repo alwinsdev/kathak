@@ -7,8 +7,8 @@ from app.domain.mudra_classifier.exceptions import InvalidFeaturesError
 from app.domain.mudra_classifier.metadata import CLASSIFIER_TYPE, MODEL_VERSION
 from app.domain.mudra_classifier.models import HandFeatures
 from app.infrastructure.classifiers.rule_based.classifier import (
-    CLOSED_FIST_MIN_CURL,
-    OPEN_PALM_MAX_CURL,
+    CLOSED_FIST_MIN_MEAN_CURL,
+    OPEN_PALM_MAX_MEAN_CURL,
     RuleBasedMudraClassifier,
 )
 
@@ -33,6 +33,7 @@ def test_open_palm_is_recognized() -> None:
     assert result.confidence == 1.0
     assert result.metadata[CLASSIFIER_TYPE] == "rule_based"
     assert result.metadata[MODEL_VERSION]
+    assert "mean_curl" in result.metadata
 
 
 def test_closed_fist_is_recognized() -> None:
@@ -41,32 +42,34 @@ def test_closed_fist_is_recognized() -> None:
     assert result.confidence == 1.0
 
 
-def test_midrange_curl_is_unknown() -> None:
-    result = RuleBasedMudraClassifier().classify(_features(_uniform(80.0)))
+def test_midrange_mean_curl_is_unknown() -> None:
+    result = RuleBasedMudraClassifier().classify(_features(_uniform(70.0)))
     assert result.label == "unknown"
     assert result.confidence == 0.0
 
 
-def test_mixed_fingers_are_unknown() -> None:
-    # Some extended, some curled -> matches neither rule.
-    curls = {"thumb": 5.0, "index": 5.0, "middle": 160.0, "ring": 5.0, "pinky": 5.0}
-    assert RuleBasedMudraClassifier().classify(_features(curls)).label == "unknown"
+def test_robust_to_one_stray_finger() -> None:
+    # Three fingers fully curled, one only partly — mean still reads as a fist.
+    curls = {"thumb": 30.0, "index": 160.0, "middle": 160.0, "ring": 160.0, "pinky": 100.0}
+    assert RuleBasedMudraClassifier().classify(_features(curls)).label == "closed_fist"
 
 
 def test_open_palm_boundary_is_inclusive() -> None:
-    result = RuleBasedMudraClassifier().classify(_features(_uniform(OPEN_PALM_MAX_CURL)))
+    result = RuleBasedMudraClassifier().classify(_features(_uniform(OPEN_PALM_MAX_MEAN_CURL)))
     assert result.label == "open_palm"
 
 
 def test_closed_fist_boundary_is_inclusive() -> None:
-    result = RuleBasedMudraClassifier().classify(_features(_uniform(CLOSED_FIST_MIN_CURL)))
+    result = RuleBasedMudraClassifier().classify(_features(_uniform(CLOSED_FIST_MIN_MEAN_CURL)))
     assert result.label == "closed_fist"
 
 
-def test_just_past_boundaries_are_unknown() -> None:
+def test_between_ranges_is_unknown() -> None:
     classifier = RuleBasedMudraClassifier()
-    assert classifier.classify(_features(_uniform(OPEN_PALM_MAX_CURL + 0.1))).label == "unknown"
-    assert classifier.classify(_features(_uniform(CLOSED_FIST_MIN_CURL - 0.1))).label == "unknown"
+    just_open = classifier.classify(_features(_uniform(OPEN_PALM_MAX_MEAN_CURL + 5)))
+    just_fist = classifier.classify(_features(_uniform(CLOSED_FIST_MIN_MEAN_CURL - 5)))
+    assert just_open.label == "unknown"
+    assert just_fist.label == "unknown"
 
 
 def test_empty_feature_vector_raises() -> None:

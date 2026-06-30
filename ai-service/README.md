@@ -176,9 +176,10 @@ domain or application change.**
   implements the existing `MudraClassifier` contract (e.g. `RuleBasedMudraClassifier`,
   later `TensorFlowMudraClassifier`, `ONNXMudraClassifier`, ...).
 - **`RuleBasedMudraClassifier`** recognizes only **`open_palm`** and
-  **`closed_fist`** from finger curl; anything else is **`unknown`**
-  (confidence `0.0`). Thresholds are illustrative — this is architectural
-  validation, **not** real mudra recognition.
+  **`closed_fist`** from the **mean** curl of the four non-thumb fingers (forgiving
+  of one stray finger); anything in between is **`unknown`** (confidence `0.0`).
+  Thresholds are illustrative — this is architectural validation, **not** full
+  mudra recognition.
 - **Reserved result metadata.** `ClassificationResult` is unchanged (frozen); the
   service guarantees its `metadata` carries the core keys `model_version`,
   `classifier_type`, `confidence`, and `prediction_timestamp` on every result, so

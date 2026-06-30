@@ -1,15 +1,17 @@
 """Rule-based mudra classifier — the first real ``MudraClassifier`` provider.
 
 Its sole purpose is to validate the inference pipeline end-to-end. It recognizes
-only two coarse hand shapes from finger curl:
+two coarse hand shapes from how much the fingers curl:
 
-* **open_palm** — all four non-thumb fingers extended (low curl);
-* **closed_fist** — all four non-thumb fingers curled (high curl);
+* **open_palm** — fingers extended (low mean curl);
+* **closed_fist** — fingers curled (high mean curl);
 
-anything else is **unknown**. This is a demonstration of the architecture, **not**
-real mudra recognition — the thresholds are illustrative constants. Real mudra
-recognition (and ML providers) arrive in later phases, all implementing this same
-``MudraClassifier`` contract.
+anything in between is **unknown**. It uses the **mean** curl of the four
+non-thumb fingers (not every finger past a hard threshold), which is forgiving of
+real hands where one finger sits slightly differently. This is a demonstration of
+the architecture, **not** full mudra recognition — real recognition (and ML
+providers) arrive in later phases, all implementing this ``MudraClassifier``
+contract.
 """
 
 from app.domain.mudra_classifier.classifier import MudraClassifier
@@ -18,11 +20,12 @@ from app.domain.mudra_classifier.metadata import CLASSIFIER_TYPE, MODEL_VERSION
 from app.domain.mudra_classifier.models import ClassificationResult, HandFeatures
 
 CLASSIFIER_TYPE_NAME = "rule_based"
-MODEL_VERSION_VALUE = "rule_based-0.1.0"
+MODEL_VERSION_VALUE = "rule_based-0.2.0"
 
-# Illustrative thresholds (degrees of curl), inclusive at the boundary.
-OPEN_PALM_MAX_CURL = 50.0
-CLOSED_FIST_MIN_CURL = 120.0
+# Mean finger-curl thresholds (degrees). The wide gap between them keeps the two
+# gestures well separated while tolerating loose/partial hands as "unknown".
+OPEN_PALM_MAX_MEAN_CURL = 50.0
+CLOSED_FIST_MIN_MEAN_CURL = 90.0
 
 # Thumb is excluded: it is the least reliable for these two coarse shapes.
 _REQUIRED_FINGERS = ("index", "middle", "ring", "pinky")
@@ -33,29 +36,30 @@ LABEL_UNKNOWN = "unknown"
 
 
 class RuleBasedMudraClassifier(MudraClassifier):
-    """Classify open_palm / closed_fist from finger-curl rules; else unknown."""
+    """Classify open_palm / closed_fist from the mean finger curl; else unknown."""
 
     def classify(self, features: HandFeatures) -> ClassificationResult:
         self._validate(features)
-        curls = [features.finger_curls[finger] for finger in _REQUIRED_FINGERS]
+        curls = {finger: features.finger_curls[finger] for finger in _REQUIRED_FINGERS}
+        mean_curl = sum(curls.values()) / len(curls)
 
-        if all(curl <= OPEN_PALM_MAX_CURL for curl in curls):
+        if mean_curl <= OPEN_PALM_MAX_MEAN_CURL:
             label, confidence, reason = (
                 LABEL_OPEN_PALM,
                 1.0,
-                "All non-thumb fingers extended (low curl).",
+                "Fingers extended (low mean curl).",
             )
-        elif all(curl >= CLOSED_FIST_MIN_CURL for curl in curls):
+        elif mean_curl >= CLOSED_FIST_MIN_MEAN_CURL:
             label, confidence, reason = (
                 LABEL_CLOSED_FIST,
                 1.0,
-                "All non-thumb fingers curled (high curl).",
+                "Fingers curled (high mean curl).",
             )
         else:
             label, confidence, reason = (
                 LABEL_UNKNOWN,
                 0.0,
-                "Finger curls match neither the open-palm nor the closed-fist rule.",
+                "Mean finger curl is between the open-palm and closed-fist ranges.",
             )
 
         return ClassificationResult(
@@ -65,6 +69,9 @@ class RuleBasedMudraClassifier(MudraClassifier):
             metadata={
                 CLASSIFIER_TYPE: CLASSIFIER_TYPE_NAME,
                 MODEL_VERSION: MODEL_VERSION_VALUE,
+                # Derived features (not coordinates) — handy for tuning live demos.
+                "mean_curl": round(mean_curl, 1),
+                "finger_curls": {finger: round(curl, 1) for finger, curl in curls.items()},
             },
         )
 
