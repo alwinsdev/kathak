@@ -7,13 +7,20 @@ touching the domain.
 
 from abc import ABC, abstractmethod
 
+from app.domain.hand_landmarks.models import HandDetections
+
 
 class HandLandmarkProvider(ABC):
-    """Lifecycle contract for a hand-landmark engine.
+    """Contract for a hand-landmark engine.
 
-    Phase 1 covers only the lifecycle (load / warmup / readiness / shutdown).
-    Landmark extraction (`detect`) is added in a later phase.
+    Lifecycle (load / warmup / readiness / shutdown) plus perception
+    (`detect`). Implementations map their native results into the pure domain
+    models before returning.
     """
+
+    @abstractmethod
+    def detect(self, image_bytes: bytes) -> HandDetections:
+        """Detect hands in an encoded image and return domain landmarks."""
 
     @abstractmethod
     def load(self) -> None:

@@ -34,3 +34,24 @@ class UnauthorizedError(AIServiceError):
 
     status_code = 401
     code = "unauthorized"
+
+
+class InvalidImageError(AIServiceError):
+    """The image payload is empty or could not be decoded."""
+
+    status_code = 400
+    code = "invalid_image"
+
+
+class UnsupportedMediaTypeError(AIServiceError):
+    """The image format is not supported."""
+
+    status_code = 415
+    code = "unsupported_media_type"
+
+
+class PayloadTooLargeError(AIServiceError):
+    """The image exceeds the allowed size or dimensions."""
+
+    status_code = 413
+    code = "payload_too_large"

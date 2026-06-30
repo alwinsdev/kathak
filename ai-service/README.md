@@ -76,6 +76,36 @@ uvicorn app.main:app --reload --port 8001
 ```
 Returns **503** with `status: unhealthy` until the model is loaded.
 
+## Prediction (Phase 2)
+`POST /predict` — **protected** (`X-API-Key`). Multipart field `image` (JPEG/PNG/WebP/BMP).
+Returns the detected hands with **21 3D landmarks**, handedness, and a bounding box:
+```json
+{
+  "hands": [
+    { "handedness": "Right", "score": 0.98,
+      "bbox": { "cx": 320.0, "cy": 240.0, "width": 110.0, "height": 130.0 },
+      "landmarks": [ { "x": 0.51, "y": 0.62, "z": -0.03 }, "...21" ] }
+  ],
+  "hands_detected": 1,
+  "image_width": 640, "image_height": 480,
+  "processing_time_ms": 14,
+  "detected_at": "2026-06-29T10:00:00Z",
+  "correlation_id": "..."
+}
+```
+- **`bbox` is an *approximate*, center-based pixel box derived from the landmark
+  extents — not a native object-detection box.** Don't assume pixel-perfect accuracy.
+- This is the **frozen contract** consumed by Laravel; later phases extend it additively.
+- Errors: `400` empty/undecodable image · `413` too large (size or dimensions) ·
+  `415` unsupported format · `401` bad/missing key · `422` missing field · `503` model not ready.
+- **Scope:** perception only — no mudra classification / explainable feedback yet.
+
+Example:
+```bash
+curl -s -X POST http://localhost:8001/predict \
+  -H "X-API-Key: $API_KEY" -F "image=@hand.jpg"
+```
+
 ## Tests & lint
 ```bash
 pip install -r requirements-dev.txt

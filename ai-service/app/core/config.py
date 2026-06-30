@@ -40,6 +40,10 @@ class Settings(BaseSettings):
     detection_confidence: float = 0.5
     tracking_confidence: float = 0.5
 
+    # Image input limits (prediction endpoint)
+    max_image_mb: int = 5
+    max_image_dimension: int = 4096
+
     @property
     def is_production(self) -> bool:
         return self.environment.lower() == "production"
