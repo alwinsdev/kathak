@@ -20,13 +20,13 @@ from app.domain.mudra_classifier.metadata import CLASSIFIER_TYPE, MODEL_VERSION
 from app.domain.mudra_classifier.models import ClassificationResult, HandFeatures
 
 CLASSIFIER_TYPE_NAME = "rule_based"
-MODEL_VERSION_VALUE = "rule_based-0.3.0"
+MODEL_VERSION_VALUE = "rule_based-0.3.1"
 
-# Mean finger-curl thresholds (degrees). Open hands read very low and fists very
-# high, so a generous fist threshold catches real (loose) fists while keeping the
-# two gestures clearly separated; the gap between them stays "unknown".
-OPEN_PALM_MAX_MEAN_CURL = 55.0
-CLOSED_FIST_MIN_MEAN_CURL = 78.0
+# Mean finger-curl thresholds (degrees), tuned from real webcam sessions: open
+# hands read ~4-32 and (loose) fists ~59-80, so we split in the clear gap. The
+# narrow band between the two stays "unknown".
+OPEN_PALM_MAX_MEAN_CURL = 45.0
+CLOSED_FIST_MIN_MEAN_CURL = 52.0
 
 # Thumb is excluded: it is the least reliable for these two coarse shapes.
 _REQUIRED_FINGERS = ("index", "middle", "ring", "pinky")
