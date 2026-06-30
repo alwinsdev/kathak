@@ -14,7 +14,7 @@ from app.infrastructure.classifiers.stub.classifier import StubMudraClassifier
 
 
 class UnknownClassifierDriverError(ValueError):
-    """The configured CLASSIFIER_DRIVER does not map to a known provider."""
+    """The configured MUDRA_CLASSIFIER_DRIVER does not map to a known provider."""
 
 
 # Driver name -> provider factory. Future drivers (ml, tensorflow, onnx, pytorch)

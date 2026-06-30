@@ -44,9 +44,10 @@ class Settings(BaseSettings):
     detection_confidence: float = 0.5
     tracking_confidence: float = 0.5
 
-    # Classifier provider selection (single composition point: classifiers.factory).
-    # Today: stub | rule_based. Future: ml | tensorflow | onnx | pytorch.
-    classifier_driver: str = "rule_based"
+    # Mudra-classifier provider selection (single composition point:
+    # classifiers.factory). Today: stub | rule_based. Future: ml | tensorflow |
+    # onnx | pytorch.
+    mudra_classifier_driver: str = "rule_based"
 
     # Image input limits (prediction endpoint)
     max_image_mb: int = 5

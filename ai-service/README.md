@@ -26,8 +26,7 @@ app/
 │   ├── providers/mediapipe/   # MediaPipeHandLandmarkProvider + ModelLoader
 │   └── classifiers/           # factory (single composition point) + providers
 │       ├── stub/              #   StubMudraClassifier (placeholder)
-│       ├── rule_based/        #   RuleBasedMudraClassifier (open_palm / closed_fist)
-│       └── ml/                #   (placeholder for future TF/ONNX/PyTorch)
+│       └── rule_based/        #   RuleBasedMudraClassifier (open_palm / closed_fist)
 ├── middleware/     # correlation-id propagation
 ├── schemas/        # pydantic response models
 └── tests/          # incl. fixtures/landmarks/ golden geometry fixtures
@@ -170,7 +169,7 @@ ClassificationRequest(hand)
 flow and depends only on the `MudraClassifier` port — **providers swap without any
 domain or application change.**
 
-- **Provider selection is config-driven.** `CLASSIFIER_DRIVER` (default
+- **Provider selection is config-driven.** `MUDRA_CLASSIFIER_DRIVER` (default
   `rule_based`) is resolved by `infrastructure/classifiers/factory.py` — the
   **single composition point**. Today: `stub`, `rule_based`. Future drivers
   (`ml`, `tensorflow`, `onnx`, `pytorch`) register there and nowhere else; each
@@ -181,9 +180,12 @@ domain or application change.**
   (confidence `0.0`). Thresholds are illustrative — this is architectural
   validation, **not** real mudra recognition.
 - **Reserved result metadata.** `ClassificationResult` is unchanged (frozen); the
-  service guarantees its `metadata` carries `model_version`, `classifier_type`,
-  `confidence`, and `prediction_timestamp` on every result, so the contract can
-  grow without breaking. `confidence` also remains a first-class result field.
+  service guarantees its `metadata` carries the core keys `model_version`,
+  `classifier_type`, `confidence`, and `prediction_timestamp` on every result, so
+  the contract can grow without breaking. `confidence` also remains a first-class
+  result field. Additional keys `classifier_name`, `classifier_version`, and
+  `dataset_version` are **reserved but optional** — populated once we begin
+  training and versioning custom models.
 - **Validation:** null/empty landmarks and empty/incomplete feature vectors raise
   the typed `InvalidFeaturesError`; an unknown driver raises
   `UnknownClassifierDriverError`.
