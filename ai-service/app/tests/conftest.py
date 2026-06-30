@@ -4,7 +4,9 @@ Uses a fake provider so the suite runs without MediaPipe or a model file.
 The API key is set before importing the app so the cached settings pick it up.
 """
 
+import json
 import os
+from pathlib import Path
 
 os.environ.setdefault("API_KEY", "test-key")
 API_KEY = os.environ["API_KEY"]
@@ -32,6 +34,24 @@ def make_hand(
         score=score,
         bbox=BoundingBox(cx=320.0, cy=240.0, width=100.0, height=120.0),
         landmarks=landmarks,
+    )
+
+
+FIXTURES_DIR = Path(__file__).parent / "fixtures" / "landmarks"
+
+
+def load_landmark_fixture(name: str) -> dict:
+    """Load a raw/golden landmark fixture JSON from tests/fixtures/landmarks."""
+    return json.loads((FIXTURES_DIR / name).read_text())
+
+
+def hand_from_points(points: list[list[float]], handedness: str = "Right") -> HandLandmarks:
+    """Build a HandLandmarks from a list of [x, y, z] points (bbox/score are filler)."""
+    return HandLandmarks(
+        handedness=handedness,
+        score=1.0,
+        bbox=BoundingBox(cx=0.0, cy=0.0, width=0.0, height=0.0),
+        landmarks=[Landmark(x=p[0], y=p[1], z=p[2]) for p in points],
     )
 
 

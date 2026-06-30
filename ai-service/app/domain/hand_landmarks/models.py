@@ -48,6 +48,21 @@ class HandLandmarks:
 
 
 @dataclass(frozen=True)
+class NormalizedHandLandmarks:
+    """The 21 landmarks of one hand in a canonical, pose-invariant frame.
+
+    Produced by ``normalize()``: the wrist sits at the origin
+    (translation-invariant), coordinates are scaled by the wrist->middle-MCP
+    distance (scale-invariant), and the hand is rotated in the image plane so
+    that axis points along +Y (2D rotation-invariant). Full 3D canonicalization
+    and handedness mirroring are deferred to a later phase.
+    """
+
+    handedness: str
+    landmarks: list[Landmark]
+
+
+@dataclass(frozen=True)
 class HandDetections:
     """Perception output of a provider for a single image."""
 

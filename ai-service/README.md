@@ -11,21 +11,24 @@ Built with FastAPI; uses **MediaPipe Hands** behind a domain abstraction.
 ## Architecture (Clean Architecture)
 ```
 app/
-├── api/            # thin HTTP routes (health)
+├── api/            # thin HTTP routes (health, landmarks)
 ├── core/           # config, logging, exceptions, security
-├── domain/         # business capabilities (library-agnostic)
-│   ├── hand_landmarks/     # HandLandmarkService + HandLandmarkProvider (port)
-│   ├── mudra_classifier/   # (later phase)
+├── domain/         # business capabilities (library-agnostic, dependency-free)
+│   ├── geometry.py         # pure-Python 3D vector helpers (shared)
+│   ├── hand_landmarks/     # HandLandmarkService + provider port; topology + normalization
+│   ├── mudra_classifier/   # HandFeatures, feature extraction, MudraClassifier port
 │   ├── explainable_ai/     # (later phase)
 │   └── feedback/           # (later phase)
 ├── infrastructure/ # implementation details
-│   └── providers/mediapipe/  # MediaPipeHandLandmarkProvider + ModelLoader
+│   ├── providers/mediapipe/   # MediaPipeHandLandmarkProvider + ModelLoader
+│   └── classifiers/stub/      # StubMudraClassifier (placeholder, no recognition)
 ├── middleware/     # correlation-id propagation
 ├── schemas/        # pydantic response models
-└── tests/
+└── tests/          # incl. fixtures/landmarks/ golden geometry fixtures
 ```
-The **domain** depends on the `HandLandmarkProvider` port; **MediaPipe lives only
-in infrastructure** and can be replaced without touching the domain.
+The **domain** depends on ports (`HandLandmarkProvider`, `MudraClassifier`);
+**MediaPipe and the classifier live only in infrastructure** and can be replaced
+without touching the domain.
 
 ## Configuration (`.env`)
 | Var | Default | Purpose |
@@ -113,6 +116,38 @@ Example:
 curl -s -X POST http://localhost:8001/landmarks \
   -H "X-API-Key: $API_KEY" -F "image=@hand.jpg"
 ```
+
+## Mudra classification — foundation (Phase 3)
+> **Foundation only — no recognition yet.** There is **no `/classify` endpoint**.
+> This phase builds the provider-agnostic pipeline a real classifier will plug
+> into: raw landmarks → normalized frame → explainable geometric features → a
+> classifier *port* with a stub. No rule engine, ML model, explainable AI, or
+> feedback generation.
+
+Pipeline (all pure-Python, dependency-free domain code):
+```
+HandLandmarks (perception)
+  → normalize()                     # domain/hand_landmarks/normalization.py
+  → NormalizedHandLandmarks         # translation + scale + 2D-rotation invariant
+  → FeatureExtractionService.extract()
+  → HandFeatures                    # curls, finger angles, spreads, key distances
+  → MudraClassifier.classify()      # port (domain/mudra_classifier/classifier.py)
+  → StubMudraClassifier             # returns {"unrecognized", 0.0} (infrastructure)
+```
+
+- **Normalization** makes hand *shape* independent of position, size, and roll
+  about the camera axis: the wrist moves to the origin, coordinates are scaled by
+  the wrist→middle-MCP distance, and the hand is rotated in-plane so that axis
+  points along **+Y**. Full 3D canonicalization (out-of-plane tilt) and handedness
+  mirroring are **deferred** to a later phase.
+- **`HandFeatures`** is intentionally **ML-agnostic** — named, explainable
+  geometry (per-finger curl/direction, inter-finger spread, key distances) that a
+  future rule-based or ML classifier can threshold or learn from.
+- **`ClassificationResult`** = `label`, `confidence`, `reason`, `metadata` — the
+  `metadata` bag lets later phases add detail without breaking the contract.
+- **Golden fixtures** (`tests/fixtures/landmarks/`) lock normalization output so
+  geometry changes can't silently regress; invariance is also asserted by
+  transforming the input (translate/scale/rotate) and re-normalizing.
 
 ## Tests & lint
 ```bash
