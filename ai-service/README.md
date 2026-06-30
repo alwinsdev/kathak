@@ -13,22 +13,28 @@ Built with FastAPI; uses **MediaPipe Hands** behind a domain abstraction.
 app/
 ├── api/            # thin HTTP routes (health, landmarks)
 ├── core/           # config, logging, exceptions, security
+├── application/    # use-case orchestration
+│   └── mudra_classifier/   # ClassificationService (normalize→extract→classify)
 ├── domain/         # business capabilities (library-agnostic, dependency-free)
 │   ├── geometry.py         # pure-Python 3D vector helpers (shared)
 │   ├── hand_landmarks/     # HandLandmarkService + provider port; topology + normalization
-│   ├── mudra_classifier/   # HandFeatures, feature extraction, MudraClassifier port
+│   ├── mudra_classifier/   # HandFeatures, feature extraction, MudraClassifier port,
+│   │                       #   ClassificationRequest/Result, reserved metadata, exceptions
 │   ├── explainable_ai/     # (later phase)
 │   └── feedback/           # (later phase)
 ├── infrastructure/ # implementation details
 │   ├── providers/mediapipe/   # MediaPipeHandLandmarkProvider + ModelLoader
-│   └── classifiers/stub/      # StubMudraClassifier (placeholder, no recognition)
+│   └── classifiers/           # factory (single composition point) + providers
+│       ├── stub/              #   StubMudraClassifier (placeholder)
+│       ├── rule_based/        #   RuleBasedMudraClassifier (open_palm / closed_fist)
+│       └── ml/                #   (placeholder for future TF/ONNX/PyTorch)
 ├── middleware/     # correlation-id propagation
 ├── schemas/        # pydantic response models
 └── tests/          # incl. fixtures/landmarks/ golden geometry fixtures
 ```
 The **domain** depends on ports (`HandLandmarkProvider`, `MudraClassifier`);
-**MediaPipe and the classifier live only in infrastructure** and can be replaced
-without touching the domain.
+**MediaPipe and the classifiers live only in infrastructure** and can be replaced
+without touching the domain or application layers.
 
 ## Configuration (`.env`)
 | Var | Default | Purpose |
@@ -148,6 +154,39 @@ HandLandmarks (perception)
 - **Golden fixtures** (`tests/fixtures/landmarks/`) lock normalization output so
   geometry changes can't silently regress; invariance is also asserted by
   transforming the input (translate/scale/rotate) and re-normalizing.
+
+## Classification engine — pluggable architecture (Phase 4)
+> **Architecture + one demo provider only.** No model training, no ML libraries
+> (TensorFlow / PyTorch / ONNX), no explainable AI, **no `/classify` endpoint**,
+> no Laravel. The rule-based classifier exists only to prove the pipeline runs.
+
+```
+ClassificationRequest(hand)
+  → normalize() → FeatureExtractionService.extract()
+  → MudraClassifier.classify()          # the Phase 3 port (provider abstraction)
+  → ClassificationResult
+```
+`ClassificationService` (in `app/application/mudra_classifier/`) orchestrates the
+flow and depends only on the `MudraClassifier` port — **providers swap without any
+domain or application change.**
+
+- **Provider selection is config-driven.** `CLASSIFIER_DRIVER` (default
+  `rule_based`) is resolved by `infrastructure/classifiers/factory.py` — the
+  **single composition point**. Today: `stub`, `rule_based`. Future drivers
+  (`ml`, `tensorflow`, `onnx`, `pytorch`) register there and nowhere else; each
+  implements the existing `MudraClassifier` contract (e.g. `RuleBasedMudraClassifier`,
+  later `TensorFlowMudraClassifier`, `ONNXMudraClassifier`, ...).
+- **`RuleBasedMudraClassifier`** recognizes only **`open_palm`** and
+  **`closed_fist`** from finger curl; anything else is **`unknown`**
+  (confidence `0.0`). Thresholds are illustrative — this is architectural
+  validation, **not** real mudra recognition.
+- **Reserved result metadata.** `ClassificationResult` is unchanged (frozen); the
+  service guarantees its `metadata` carries `model_version`, `classifier_type`,
+  `confidence`, and `prediction_timestamp` on every result, so the contract can
+  grow without breaking. `confidence` also remains a first-class result field.
+- **Validation:** null/empty landmarks and empty/incomplete feature vectors raise
+  the typed `InvalidFeaturesError`; an unknown driver raises
+  `UnknownClassifierDriverError`.
 
 ## Tests & lint
 ```bash
