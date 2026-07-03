@@ -1,3 +1,4 @@
+@props(['wide' => false])
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
@@ -24,7 +25,7 @@
                 <span class="text-xl font-bold tracking-tight text-gray-800">{{ config('app.name') }}</span>
             </a>
 
-            <div class="z-10 mt-6 w-full overflow-hidden rounded-2xl bg-white px-8 py-7 shadow-xl shadow-gray-900/5 ring-1 ring-gray-900/5 sm:max-w-md">
+            <div class="rise-in z-10 my-6 w-full overflow-hidden rounded-2xl bg-white px-6 py-7 shadow-xl shadow-gray-900/5 ring-1 ring-gray-900/5 sm:px-8 {{ $wide ? 'sm:max-w-xl' : 'sm:max-w-md' }}">
                 {{ $slot }}
             </div>
         </div>
