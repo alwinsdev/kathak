@@ -6,16 +6,20 @@ namespace App\Http\Controllers\Patient;
 
 use App\Http\Controllers\Controller;
 use App\Models\Prescription;
+use App\Repositories\PracticeSessionRepository;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 class PracticeController extends Controller
 {
+    public function __construct(private readonly PracticeSessionRepository $sessions) {}
+
     /**
      * The live AI practice screen for one of the patient's own prescriptions.
      * The camera + detection behaviour is driven by config (no magic numbers).
      */
-    public function show(Prescription $prescription): View
+    public function show(Request $request, Prescription $prescription): View
     {
         Gate::authorize('view', $prescription);
 
@@ -24,9 +28,16 @@ class PracticeController extends Controller
         $guide = config('mudra_guides.'.$prescription->mudra->ai_class_label)
             ?? config('mudra_guides.default');
 
+        // If it's already verified today, show the completed state up front
+        // (no camera) unless the patient explicitly chose to practise again.
+        $completedToday = $request->boolean('again')
+            ? null
+            : $this->sessions->verifiedToday($prescription);
+
         return view('patient.practice.show', [
             'prescription' => $prescription,
             'guide' => $guide,
+            'completedToday' => $completedToday,
             'practiceConfig' => [
                 'holdSeconds' => (int) config('practice.hold_seconds'),
                 'detectionIntervalMs' => (int) config('practice.detection_interval_ms'),

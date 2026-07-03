@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Patient;
 
+use App\Enums\PracticeStatus;
 use App\Models\PatientProfile;
 use App\Models\PracticeSession;
 use App\Models\Prescription;
@@ -52,7 +53,27 @@ class PatientPagesTest extends TestCase
         $this->actingAs($patient)->get(route('patient.practice.show', $prescription))
             ->assertOk()
             ->assertSee($prescription->mudra->name)
-            ->assertSee('Detection Status');
+            ->assertSee('Detection Status')
+            ->assertSee('Start Practice');
+    }
+
+    public function test_practice_screen_shows_completed_state_when_already_verified_today(): void
+    {
+        $patient = $this->patient();
+        $prescription = Prescription::factory()->create(['patient_id' => $patient->id]);
+        PracticeSession::factory()->create([
+            'patient_id' => $patient->id,
+            'prescription_id' => $prescription->id,
+            'status' => PracticeStatus::Verified,
+            'practiced_on' => now()->toDateString(),
+            'best_confidence' => 0.95,
+            'completed_at' => now(),
+        ]);
+
+        $this->actingAs($patient)->get(route('patient.practice.show', $prescription))
+            ->assertOk()
+            ->assertSee('Completed for today')
+            ->assertDontSee('Start Practice'); // no camera/practice flow when already done
     }
 
     public function test_practice_entry_is_forbidden_for_another_patient(): void

@@ -15,7 +15,7 @@
     </x-slot>
 
     <div class="py-6">
-        <div id="practice-root"
+        <div @unless ($completedToday) id="practice-root" @endunless
              class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"
              data-start-url="{{ route('patient.practice.start', $prescription) }}"
              data-detect-template="{{ route('patient.practice.detect', ['session' => '__SESSION__']) }}"
@@ -28,6 +28,18 @@
 
                 {{-- LEFT: camera + guide --}}
                 <div class="space-y-6 lg:col-span-2">
+                    @if ($completedToday)
+                        {{-- Already done today: calm completed state, no camera --}}
+                        <div class="flex flex-col items-center justify-center rounded-xl border border-teal-100 bg-gradient-to-b from-teal-50 to-white px-6 py-16 text-center shadow-sm" style="min-height:320px">
+                            <div class="flex h-20 w-20 items-center justify-center rounded-full bg-teal-100 text-teal-600">
+                                <svg class="h-11 w-11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            </div>
+                            <h3 class="mt-5 text-xl font-semibold text-gray-900">{{ __('Completed for today') }}</h3>
+                            <p class="mt-1 max-w-sm text-sm text-gray-500">
+                                {{ __('You have already practised') }} <span class="font-medium text-gray-700">{{ $prescription->mudra->name }}</span> {{ __('today. Great work — come back tomorrow!') }}
+                            </p>
+                        </div>
+                    @else
                     {{-- Camera --}}
                     <div class="relative overflow-hidden rounded-xl bg-slate-900 shadow-sm" style="min-height:320px">
                         <video id="practice-video" autoplay playsinline muted class="block w-full"></video>
@@ -39,6 +51,7 @@
                         <div id="practice-resolution"
                              class="absolute bottom-3 right-3 rounded bg-black/55 px-2 py-0.5 text-xs text-white/90"></div>
                     </div>
+                    @endif
 
                     {{-- Mudra teaching guide --}}
                     <x-card id="mudra-guide">
@@ -81,6 +94,32 @@
                 {{-- RIGHT: detection, progress, session --}}
                 <div class="space-y-6">
                     {{-- Detection status --}}
+                    @if ($completedToday)
+                        <x-card>
+                            <h3 class="font-semibold text-gray-800">{{ __('Detection Status') }}</h3>
+
+                            <div class="mt-3 flex items-center gap-2">
+                                <span class="h-2.5 w-2.5 rounded-full bg-teal-500"></span>
+                                <span class="text-sm font-semibold text-teal-700">{{ __('Completed') }}</span>
+                                @if ($completedToday->best_confidence)
+                                    <span class="ml-auto text-sm font-semibold text-gray-500">{{ number_format($completedToday->best_confidence * 100, 0) }}%</span>
+                                @endif
+                            </div>
+
+                            <div class="mt-4 h-2.5 w-full overflow-hidden rounded-full bg-gray-200">
+                                <div class="h-full w-full bg-teal-500"></div>
+                            </div>
+
+                            <div class="mt-4 rounded-lg bg-teal-50 p-3 text-sm text-teal-800">
+                                ✓ {{ __('Verified today') }}@if ($completedToday->completed_at) {{ __('at') }} {{ $completedToday->completed_at->format('g:i A') }}@endif. {{ __('Great work!') }}
+                            </div>
+
+                            <a href="{{ route('patient.dashboard') }}"
+                               class="mt-4 block w-full rounded-md bg-teal-600 px-4 py-2.5 text-center font-medium text-white hover:bg-teal-700">
+                                {{ __('Back to today') }}
+                            </a>
+                        </x-card>
+                    @else
                     <x-card>
                         <h3 class="font-semibold text-gray-800">{{ __('Detection Status') }}</h3>
 
@@ -115,6 +154,7 @@
                             </button>
                         </div>
                     </x-card>
+                    @endif
 
                     {{-- Target mudra --}}
                     <x-card>
