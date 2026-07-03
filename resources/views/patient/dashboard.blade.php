@@ -9,9 +9,9 @@
         <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <x-stat-card label="Today's Therapy" :value="$today->summary->total" icon="🧘" />
-                <x-stat-card label="Completed" :value="$today->summary->completed" icon="✓" />
-                <x-stat-card label="Pending" :value="$today->summary->pending" icon="⏳" />
+                <x-stat-card label="Today's Therapy" :value="$today->summary->total" icon="therapy" />
+                <x-stat-card label="Completed" :value="$today->summary->completed" icon="check" />
+                <x-stat-card label="Pending" :value="$today->summary->pending" icon="pending" />
             </div>
 
             <x-card>

@@ -9,11 +9,11 @@
         <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
 
             <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                <x-stat-card label="Total Sessions" :value="$stats->total" icon="📊" />
-                <x-stat-card label="This Week" :value="$stats->thisWeek" icon="📆" />
-                <x-stat-card label="Current Streak" :value="$stats->streak.' '.__('days')" icon="🔥" />
+                <x-stat-card label="Total Sessions" :value="$stats->total" icon="sessions" />
+                <x-stat-card label="This Week" :value="$stats->thisWeek" icon="calendar" />
+                <x-stat-card label="Current Streak" :value="$stats->streak.' '.__('days')" icon="streak" />
                 <x-stat-card label="Last Practice"
-                    :value="$stats->lastPracticeDate?->format('d M Y') ?? '—'" icon="🕒" />
+                    :value="$stats->lastPracticeDate?->format('d M Y') ?? '—'" icon="clock" />
             </div>
 
             {{-- Practice activity calendar --}}

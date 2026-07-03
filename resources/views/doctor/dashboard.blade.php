@@ -13,12 +13,12 @@
             @endif
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <x-stat-card label="My Patients" :value="$totalPatients" icon="👥" />
-                <x-stat-card label="Active Prescriptions" :value="$totalActivePrescriptions" icon="📋" />
-                <x-stat-card label="Today" :value="now()->format('d M Y')" icon="📅" />
+                <x-stat-card label="My Patients" :value="$totalPatients" icon="patients" />
+                <x-stat-card label="Active Prescriptions" :value="$totalActivePrescriptions" icon="prescriptions" />
+                <x-stat-card label="Today" :value="now()->format('d M Y')" icon="calendar" />
             </div>
 
-            <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+            <div class="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm ring-1 ring-gray-900/[0.03]">
                 <div class="border-b border-gray-100 px-6 py-4">
                     <h3 class="font-semibold text-gray-800">{{ __('Patient List') }}</h3>
                 </div>
@@ -52,8 +52,9 @@
                                     </td>
                                     <td class="px-6 py-4 text-right">
                                         <a href="{{ route('doctor.patients.show', $patient) }}"
-                                           class="rounded-md bg-teal-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-teal-700">
+                                           class="inline-flex items-center gap-1 rounded-lg bg-teal-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm shadow-teal-600/20 transition hover:bg-teal-700">
                                             {{ __('Manage') }}
+                                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
                                         </a>
                                     </td>
                                 </tr>
