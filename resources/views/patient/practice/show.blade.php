@@ -20,6 +20,8 @@
              data-start-url="{{ route('patient.practice.start', $prescription) }}"
              data-detect-template="{{ route('patient.practice.detect', ['session' => '__SESSION__']) }}"
              data-target="{{ $prescription->mudra->name }}"
+             data-next-url="{{ $nextPractice ? route('patient.practice.show', $nextPractice) : '' }}"
+             data-next-name="{{ $nextPractice?->mudra->name ?? '' }}"
              data-jpeg-quality="{{ $practiceConfig['jpegQuality'] }}"
              data-hold-seconds="{{ $practiceConfig['holdSeconds'] }}"
              data-detection-interval-ms="{{ $practiceConfig['detectionIntervalMs'] }}">
@@ -50,6 +52,27 @@
                         </div>
                         <div id="practice-resolution"
                              class="absolute bottom-3 right-3 rounded bg-black/55 px-2 py-0.5 text-xs text-white/90"></div>
+
+                        {{-- Success celebration overlay (revealed by practice.js on verification) --}}
+                        <div id="practice-success" class="absolute inset-0 z-10 hidden flex-col items-center justify-center bg-teal-900/75 px-6 text-center backdrop-blur-sm">
+                            <div id="practice-confetti" class="pointer-events-none absolute inset-0 overflow-hidden"></div>
+                            <div class="practice-pop flex h-20 w-20 items-center justify-center rounded-full bg-white text-teal-600 shadow-xl">
+                                <svg class="h-11 w-11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            </div>
+                            <h3 class="mt-4 text-2xl font-extrabold text-white">{{ __('Session verified!') }}</h3>
+                            <p id="practice-success-sub" class="mt-1 text-sm text-teal-100"></p>
+                            <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+                                <a id="practice-next" href="#"
+                                   class="hidden items-center gap-1.5 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-teal-700 shadow-lg transition hover:-translate-y-0.5">
+                                    {{ __('Next:') }} <span id="practice-next-name"></span>
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                                </a>
+                                <a href="{{ route('patient.dashboard') }}"
+                                   class="rounded-xl border border-white/40 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10">
+                                    {{ __('Back to today') }}
+                                </a>
+                            </div>
+                        </div>
                     </div>
                     @endif
 
@@ -146,11 +169,13 @@
                         </div>
 
                         <div class="mt-4">
-                            <button id="practice-start" class="w-full rounded-md bg-teal-600 px-4 py-2.5 font-medium text-white hover:bg-teal-700">
-                                ▶ {{ __('Start Practice') }}
+                            <button id="practice-start" class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-teal-600 px-4 py-2.5 font-semibold text-white shadow-sm shadow-teal-600/20 transition hover:bg-teal-700">
+                                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                                {{ __('Start Practice') }}
                             </button>
-                            <button id="practice-stop" class="hidden w-full rounded-md border border-gray-300 px-4 py-2.5 font-medium text-gray-700 hover:bg-gray-50">
-                                ⏹ {{ __('Stop Practice') }}
+                            <button id="practice-stop" class="hidden inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 px-4 py-2.5 font-semibold text-gray-700 transition hover:bg-gray-50">
+                                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1.5" /></svg>
+                                {{ __('Stop Practice') }}
                             </button>
                         </div>
                     </x-card>

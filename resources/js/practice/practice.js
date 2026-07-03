@@ -60,6 +60,50 @@ function boot() {
 
     let starting = false;
     let loop = null;
+    let celebrated = false;
+
+    // Success celebration: reveal the overlay, wire the "next mudra" link and
+    // rain a little confetti over the camera area. Pure presentation.
+    function celebrate(data) {
+        if (celebrated) return;
+        celebrated = true;
+
+        const overlay = el('practice-success');
+        if (!overlay) return;
+
+        const sub = el('practice-success-sub');
+        if (sub) {
+            const pct = ((data.confidence ?? 0) * 100).toFixed(0);
+            sub.textContent = `${target} · ${pct}% confidence`;
+        }
+
+        const nextUrl = root.dataset.nextUrl;
+        const nextLink = el('practice-next');
+        if (nextLink && nextUrl) {
+            nextLink.href = nextUrl;
+            const nextName = el('practice-next-name');
+            if (nextName) nextName.textContent = root.dataset.nextName ?? '';
+            nextLink.classList.remove('hidden');
+            nextLink.classList.add('inline-flex');
+        }
+
+        const holder = el('practice-confetti');
+        if (holder) {
+            const colors = ['#14b8a6', '#f59e0b', '#f43f5e', '#8b5cf6', '#22c55e', '#0ea5e9'];
+            for (let i = 0; i < 28; i += 1) {
+                const piece = document.createElement('span');
+                piece.className = 'confetti-piece';
+                piece.style.left = `${Math.random() * 100}%`;
+                piece.style.backgroundColor = colors[i % colors.length];
+                piece.style.animationDuration = `${1.8 + Math.random() * 1.6}s`;
+                piece.style.animationDelay = `${Math.random() * 0.4}s`;
+                holder.appendChild(piece);
+            }
+        }
+
+        overlay.classList.remove('hidden');
+        overlay.classList.add('flex');
+    }
 
     const teardown = () => {
         loop?.stop();
@@ -106,6 +150,7 @@ function boot() {
             loop = null;
             camera.stop();
             toggleButtons(false);
+            celebrate(data);
             return;
         }
 
