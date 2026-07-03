@@ -82,7 +82,9 @@
                             </ul>
                         </template>
                         <div x-show="!selectedSessions.length" class="py-10 text-center text-sm text-gray-400">
-                            <div class="mb-1 text-2xl">🧘</div>
+                            <div class="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-gray-50 text-gray-300">
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                            </div>
                             {{ __('No practice on this day.') }}
                         </div>
                     </div>
