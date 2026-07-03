@@ -87,7 +87,8 @@ class PatientPagesTest extends TestCase
 
         $this->actingAs($patient)->get(route('patient.history'))
             ->assertOk()
-            ->assertSee('No practice sessions yet.');
+            ->assertSee('Practice Calendar')
+            ->assertSee('No practice on this day.');
     }
 
     public function test_doctor_cannot_access_patient_pages(): void

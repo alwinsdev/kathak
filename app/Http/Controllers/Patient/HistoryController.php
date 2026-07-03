@@ -23,6 +23,7 @@ class HistoryController extends Controller
         return view('patient.history', [
             'sessions' => $this->history->recent($patient),
             'stats' => $this->history->stats($patient),
+            'calendar' => $this->history->calendar($patient),
         ]);
     }
 }

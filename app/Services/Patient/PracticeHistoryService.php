@@ -28,6 +28,26 @@ class PracticeHistoryService
     }
 
     /**
+     * All verified sessions grouped by calendar day, for the activity calendar.
+     *
+     * @return array<string, list<array{mudra: string, confidence: float|null}>>
+     */
+    public function calendar(User $patient): array
+    {
+        return $this->sessions->verifiedFor($patient)
+            ->loadMissing('prescription.mudra')
+            ->sortByDesc('completed_at')
+            ->groupBy(fn ($session) => $session->practiced_on->toDateString())
+            ->map(fn ($group) => $group->map(fn ($session) => [
+                'mudra' => $session->prescription?->mudra?->name ?? '—',
+                'confidence' => $session->best_confidence !== null
+                    ? round((float) $session->best_confidence * 100, 1)
+                    : null,
+            ])->values()->all())
+            ->all();
+    }
+
+    /**
      * Summary statistics for the history page.
      */
     public function stats(User $patient): HistoryStats
