@@ -3,7 +3,8 @@
  *
  * Wires the camera, detection loop and overlay, and renders status to the DOM.
  * It holds NO AI logic: match/hold/verification all come from the server's
- * DetectionResult. The browser only displays what the backend returns.
+ * DetectionResult. The browser only displays what the backend returns, mapped
+ * to friendly presentation states (Excellent / Good / Almost there / Try again).
  */
 import { CameraController } from './camera.js';
 import { DetectionLoop } from './detector.js';
@@ -13,7 +14,25 @@ function csrfToken() {
     return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
 }
 
-const DOT = { matched: '#22c55e', seen: '#f59e0b', none: '#d1d5db', verified: '#0d9488' };
+/** Presentation palette per detection state (classes swapped as a set). */
+const STATES = {
+    idle: { dot: 'bg-gray-300', box: 'bg-gray-50', text: 'text-gray-700', live: 'bg-gray-400' },
+    search: { dot: 'bg-gray-400 animate-pulse', box: 'bg-gray-50', text: 'text-gray-700', live: 'bg-gray-400' },
+    wrong: { dot: 'bg-rose-500', box: 'bg-rose-50', text: 'text-rose-700', live: 'bg-rose-400' },
+    almost: { dot: 'bg-amber-500', box: 'bg-amber-50', text: 'text-amber-700', live: 'bg-amber-400' },
+    good: { dot: 'bg-teal-500', box: 'bg-teal-50', text: 'text-teal-700', live: 'bg-teal-400' },
+    excellent: { dot: 'bg-emerald-500', box: 'bg-emerald-50', text: 'text-emerald-700', live: 'bg-emerald-400' },
+    verified: { dot: 'bg-emerald-500', box: 'bg-emerald-50', text: 'text-emerald-700', live: 'bg-emerald-400' },
+};
+
+const classesOf = (key) => Object.values(STATES).flatMap((s) => s[key].split(' '));
+const swap = (element, key, state) => {
+    if (!element) return;
+    element.classList.remove(...classesOf(key));
+    element.classList.add(...STATES[state][key].split(' '));
+};
+
+const titleCase = (token) => (token ? token.charAt(0).toUpperCase() + token.slice(1) : '');
 
 function boot() {
     const root = document.getElementById('practice-root');
@@ -26,10 +45,18 @@ function boot() {
     const stopBtn = el('practice-stop');
     const pill = el('practice-camera-pill');
     const resolution = el('practice-resolution');
+    const idle = el('practice-idle');
+    const stateBox = el('practice-state');
     const dot = el('practice-status-dot');
     const detected = el('practice-detected');
     const confidence = el('practice-confidence');
+    const compare = el('practice-compare');
+    const compareDetected = el('practice-compare-detected');
+    const livePill = el('practice-live-pill');
+    const liveDot = el('practice-live-dot');
+    const liveText = el('practice-live-text');
     const holdBar = el('practice-hold-bar');
+    const holdStrip = el('practice-hold-strip');
     const holdLabel = el('practice-hold-label');
     const message = el('practice-message');
     const sessionStarted = el('practice-session-started');
@@ -38,24 +65,54 @@ function boot() {
     const startUrl = root.dataset.startUrl;
     const detectTemplate = root.dataset.detectTemplate;
     const target = root.dataset.target ?? 'the prescribed mudra';
+    const targetLabel = (root.dataset.targetLabel ?? '').toLowerCase();
+    const threshold = parseFloat(root.dataset.confidenceThreshold ?? '0.75');
     const intervalMs = parseInt(root.dataset.detectionIntervalMs ?? '1000', 10);
     const jpegQuality = parseFloat(root.dataset.jpegQuality ?? '0.7');
 
     const setMessage = (text) => { if (message) message.textContent = text; };
-    const setDot = (color) => { if (dot) dot.style.backgroundColor = color; };
-    const setDetected = (text, conf) => {
-        if (detected) detected.textContent = text;
-        if (confidence) confidence.textContent = conf == null ? '' : `${(conf * 100).toFixed(0)}%`;
+
+    /** One call renders the whole detection state (card + on-video pill). */
+    const setState = (state, label, confidencePct = null) => {
+        swap(stateBox, 'box', state);
+        swap(dot, 'dot', state);
+        swap(detected, 'text', state);
+        swap(liveDot, 'live', state);
+        if (detected) detected.textContent = label;
+        if (liveText) liveText.textContent = label;
+        if (confidence) confidence.textContent = confidencePct === null ? '' : `${confidencePct}%`;
     };
+
+    const setCompare = (detectedName) => {
+        if (!compare) return;
+        if (!detectedName) {
+            compare.classList.add('hidden');
+            compare.classList.remove('flex');
+            return;
+        }
+        if (compareDetected) compareDetected.textContent = detectedName;
+        compare.classList.remove('hidden');
+        compare.classList.add('flex');
+        // retrigger the gentle shake
+        compare.classList.remove('shake');
+        void compare.offsetWidth;
+        compare.classList.add('shake');
+    };
+
     const setHold = (held, hold) => {
         const pct = hold ? Math.max(0, Math.min(100, (held / hold) * 100)) : 0;
         if (holdBar) holdBar.style.width = `${pct.toFixed(0)}%`;
+        if (holdStrip) holdStrip.style.width = `${pct.toFixed(0)}%`;
         if (holdLabel) holdLabel.textContent = `${(held ?? 0).toFixed(1)}s / ${hold ?? 0}s`;
     };
+
     const toggleButtons = (running) => {
         startBtn?.classList.toggle('hidden', running);
         stopBtn?.classList.toggle('hidden', !running);
         pill?.classList.toggle('hidden', !running);
+        idle?.classList.toggle('hidden', running);
+        livePill?.classList.toggle('hidden', !running);
+        livePill?.classList.toggle('flex', running);
     };
 
     let starting = false;
@@ -68,8 +125,8 @@ function boot() {
         if (celebrated) return;
         celebrated = true;
 
-        const overlay = el('practice-success');
-        if (!overlay) return;
+        const successOverlay = el('practice-success');
+        if (!successOverlay) return;
 
         const sub = el('practice-success-sub');
         if (sub) {
@@ -101,8 +158,8 @@ function boot() {
             }
         }
 
-        overlay.classList.remove('hidden');
-        overlay.classList.add('flex');
+        successOverlay.classList.remove('hidden');
+        successOverlay.classList.add('flex');
     }
 
     const teardown = () => {
@@ -111,13 +168,15 @@ function boot() {
         camera.stop();
         clearOverlay(overlay);
         toggleButtons(false);
+        setHold(0, parseInt(root.dataset.holdSeconds, 10) || 0);
+        setCompare(null);
     };
 
     const camera = new CameraController(video, {
         jpegQuality,
         onDisconnect: () => {
             teardown();
-            setDot(DOT.none);
+            setState('idle', 'Camera disconnected');
             setMessage('Camera disconnected. Press Start to try again.');
         },
     });
@@ -133,7 +192,8 @@ function boot() {
 
     function handleResult(data) {
         if (data.error) {
-            setDot(DOT.none);
+            setState('idle', 'Detection unavailable');
+            setCompare(null);
             setMessage(`⚠ ${data.message ?? 'Detection is temporarily unavailable.'}`);
             return;
         }
@@ -142,8 +202,8 @@ function boot() {
         setHold(data.held_seconds ?? 0, data.hold_seconds ?? 0);
 
         if (data.verified) {
-            setDot(DOT.verified);
-            setDetected('Verified', data.confidence);
+            setState('verified', 'Verified', Math.round((data.confidence ?? 0) * 100));
+            setCompare(null);
             setHold(data.hold_seconds, data.hold_seconds);
             setMessage('✓ Verified! Your session has been recorded.');
             loop?.stop();
@@ -154,21 +214,32 @@ function boot() {
             return;
         }
 
-        const pct = data.hold_seconds ? ((data.held_seconds ?? 0) / data.hold_seconds) * 100 : 0;
+        const detectedToken = (data.detected_class ?? '').toLowerCase();
+        const targetPct = Math.round((data.confidence ?? 0) * 100);
+        const topPct = Math.round((data.top_confidence ?? 0) * 100);
+        const holdPct = data.hold_seconds ? ((data.held_seconds ?? 0) / data.hold_seconds) * 100 : 0;
 
         if (data.matched) {
-            setDot(DOT.matched);
-            setDetected(data.detected_class, data.top_confidence);
-            if (pct >= 80) setMessage('Almost there — keep holding!');
-            else if (pct >= 30) setMessage('Great! Keep holding… steady hands are the key.');
+            // Friendly tiers: Excellent >= 90%, Good >= threshold.
+            const excellent = (data.confidence ?? 0) >= 0.9;
+            setState(excellent ? 'excellent' : 'good', `${excellent ? 'Excellent' : 'Good'} — ${target}`, targetPct);
+            setCompare(null);
+            if (holdPct >= 80) setMessage('Almost there — keep holding!');
+            else if (holdPct >= 30) setMessage('Great! Keep holding… steady hands are the key.');
             else setMessage('Detected! Hold it steady…');
-        } else if (data.detected_class) {
-            setDot(DOT.seen);
-            setDetected(data.detected_class, data.top_confidence);
-            setMessage(`Not quite — show your ${target} mudra.`);
+        } else if (detectedToken && detectedToken === targetLabel) {
+            // Right mudra, but below the confidence bar.
+            setState('almost', `Almost there — ${target}`, targetPct);
+            setCompare(null);
+            setMessage(`Right mudra! Adjust your pose to pass ${Math.round(threshold * 100)}% confidence.`);
+        } else if (detectedToken) {
+            // A different mudra was recognised — show the comparison.
+            setState('wrong', 'Try again', topPct);
+            setCompare(titleCase(detectedToken));
+            setMessage(`That looks like ${titleCase(detectedToken)} — show your ${target} mudra.`);
         } else {
-            setDot(DOT.none);
-            setDetected('Searching…', null);
+            setState('search', 'Searching…');
+            setCompare(null);
             setMessage(`Searching… show your ${target} mudra clearly.`);
         }
     }
@@ -197,17 +268,17 @@ function boot() {
             toggleButtons(true);
 
             if (session.verified) {
-                setDot(DOT.verified);
-                setDetected('Completed', null);
+                setState('verified', 'Completed');
                 setHold(parseInt(root.dataset.holdSeconds, 10), parseInt(root.dataset.holdSeconds, 10));
                 setMessage('You have already completed this today. Great work!');
             } else {
+                setState('search', 'Searching…');
                 const detectUrl = detectTemplate.replace('__SESSION__', session.session_id);
                 loop = new DetectionLoop(camera, detectUrl, {
                     intervalMs,
                     onResult: handleResult,
                     onError: (error, status) => {
-                        setDot(DOT.none);
+                        setState('idle', 'Connection issue');
                         if (status === 419) {
                             setMessage('⚠ Your session expired. Please refresh the page to continue.');
                             loop?.stop();
@@ -221,7 +292,7 @@ function boot() {
             }
         } catch (error) {
             teardown();
-            setDot(DOT.none);
+            setState('idle', 'Press Start to begin');
             setMessage(error.message);
         } finally {
             starting = false;
@@ -232,7 +303,7 @@ function boot() {
     startBtn?.addEventListener('click', start);
     stopBtn?.addEventListener('click', () => {
         teardown();
-        setDot(DOT.none);
+        setState('idle', 'Press Start to begin');
         setMessage('Practice stopped. Press Start to resume.');
     });
 

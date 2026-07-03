@@ -23,6 +23,8 @@
              data-start-url="{{ route('patient.practice.start', $prescription) }}"
              data-detect-template="{{ route('patient.practice.detect', ['session' => '__SESSION__']) }}"
              data-target="{{ $prescription->mudra->name }}"
+             data-target-label="{{ $prescription->mudra->ai_class_label }}"
+             data-confidence-threshold="{{ $practiceConfig['confidenceThreshold'] }}"
              data-next-url="{{ $nextPractice ? route('patient.practice.show', $nextPractice) : '' }}"
              data-next-name="{{ $nextPractice?->mudra->name ?? '' }}"
              data-jpeg-quality="{{ $practiceConfig['jpegQuality'] }}"
@@ -46,15 +48,41 @@
                         </div>
                     @else
                     {{-- Camera --}}
-                    <div class="relative overflow-hidden rounded-xl bg-slate-900 shadow-sm" style="min-height:320px">
+                    <div class="relative overflow-hidden rounded-2xl bg-gray-900 shadow-sm ring-1 ring-gray-900/5" style="min-height:320px">
                         <video id="practice-video" autoplay playsinline muted class="block w-full"></video>
                         <canvas id="practice-overlay" class="pointer-events-none absolute inset-0 h-full w-full"></canvas>
+
+                        {{-- Pre-start designed state (hidden once the camera runs) --}}
+                        <div id="practice-idle" class="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-gray-800 to-gray-900 px-6 text-center">
+                            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-white/70">
+                                <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                            </div>
+                            <p class="text-sm font-semibold text-white/80">{{ __('Your camera preview will appear here') }}</p>
+                            <p class="text-xs text-white/40">{{ __('Press Start Practice, then mirror the target mudra.') }}</p>
+                        </div>
+
                         <div id="practice-camera-pill"
-                             class="absolute left-3 top-3 hidden items-center gap-1.5 rounded-full bg-black/55 px-3 py-1 text-xs font-medium text-white">
-                            <span class="h-2 w-2 rounded-full bg-green-400"></span>{{ __('Camera Active') }}
+                             class="absolute left-3 top-3 hidden items-center gap-1.5 rounded-full bg-black/55 px-3 py-1 text-xs font-medium text-white backdrop-blur">
+                            <span class="relative flex h-2 w-2">
+                                <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-70"></span>
+                                <span class="relative inline-flex h-2 w-2 rounded-full bg-green-400"></span>
+                            </span>
+                            {{ __('Camera Active') }}
                         </div>
                         <div id="practice-resolution"
-                             class="absolute bottom-3 right-3 rounded bg-black/55 px-2 py-0.5 text-xs text-white/90"></div>
+                             class="absolute bottom-4 right-3 rounded bg-black/55 px-2 py-0.5 text-xs text-white/90"></div>
+
+                        {{-- Live detection pill (mirrors the status card; decorative for AT) --}}
+                        <div id="practice-live-pill" aria-hidden="true"
+                             class="absolute bottom-4 left-3 hidden items-center gap-2 rounded-full bg-gray-900/75 px-3.5 py-1.5 text-xs font-semibold text-white backdrop-blur">
+                            <span id="practice-live-dot" class="h-2 w-2 rounded-full bg-gray-400"></span>
+                            <span id="practice-live-text">{{ __('Searching…') }}</span>
+                        </div>
+
+                        {{-- Hold progress strip on the video edge --}}
+                        <div class="absolute inset-x-0 bottom-0 h-1.5 bg-black/40">
+                            <div id="practice-hold-strip" class="h-full w-0 bg-teal-400 transition-all duration-300"></div>
+                        </div>
 
                         {{-- Success celebration overlay (revealed by practice.js on verification) --}}
                         <div id="practice-success" class="absolute inset-0 z-10 hidden flex-col items-center justify-center bg-teal-900/75 px-6 text-center backdrop-blur-sm">
@@ -82,18 +110,7 @@
                     {{-- Mudra teaching guide --}}
                     <x-card id="mudra-guide">
                         <h3 class="mb-4 font-semibold text-gray-800">{{ __('How to do') }} {{ $prescription->mudra->name }} {{ __('mudra') }}</h3>
-                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
-                            <div>
-                                <div class="text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('The shape') }}</div>
-                                <div class="mt-2 flex h-28 items-center justify-center rounded-lg bg-teal-50 text-6xl">
-                                    @if ($prescription->mudra->reference_image_path)
-                                        <img src="{{ asset($prescription->mudra->reference_image_path) }}" alt="{{ $prescription->mudra->name }}" class="h-full object-contain">
-                                    @else
-                                        <span>{{ $guide['symbol'] }}</span>
-                                    @endif
-                                </div>
-                                <p class="mt-2 text-sm text-gray-600">{{ $prescription->mudra->description }}</p>
-                            </div>
+                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                             <div>
                                 <div class="text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Steps') }}</div>
                                 <ol class="mt-2 space-y-2 text-sm text-gray-700">
@@ -149,25 +166,33 @@
                     <x-card>
                         <h3 class="font-semibold text-gray-800">{{ __('Detection Status') }}</h3>
 
-                        <div class="mt-3 flex items-center justify-between">
-                            <div class="flex items-center gap-2">
-                                <span id="practice-status-dot" class="h-2.5 w-2.5 rounded-full bg-gray-300"></span>
-                                <span id="practice-detected" class="text-sm font-medium text-gray-700">{{ __('Press Start to begin') }}</span>
+                        {{-- State box: friendly tier + big confidence number --}}
+                        <div id="practice-state" class="mt-3 flex items-center justify-between gap-3 rounded-xl bg-gray-50 px-3.5 py-3 transition-colors">
+                            <div class="flex min-w-0 items-center gap-2.5">
+                                <span id="practice-status-dot" class="h-2.5 w-2.5 shrink-0 rounded-full bg-gray-300"></span>
+                                <span id="practice-detected" class="truncate text-sm font-semibold text-gray-700">{{ __('Press Start to begin') }}</span>
                             </div>
-                            <span id="practice-confidence" class="text-sm font-semibold text-gray-500"></span>
+                            <span id="practice-confidence" class="shrink-0 text-xl font-extrabold tabular-nums text-gray-900"></span>
+                        </div>
+
+                        {{-- Detected vs target (shown only on a mismatch) --}}
+                        <div id="practice-compare" class="mt-2 hidden items-center justify-between gap-2 rounded-xl border border-rose-100 bg-rose-50 px-3.5 py-2 text-xs">
+                            <span class="min-w-0 truncate text-rose-700">{{ __('Detected') }}: <b id="practice-compare-detected" class="font-bold"></b></span>
+                            <svg class="h-3.5 w-3.5 shrink-0 text-rose-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                            <span class="min-w-0 truncate text-gray-600">{{ __('Target') }}: <b class="font-bold text-gray-800">{{ $prescription->mudra->name }}</b></span>
                         </div>
 
                         <div class="mt-4">
-                            <div class="mb-1 flex items-center justify-between text-xs text-gray-500">
-                                <span>{{ __('Hold progress') }}</span>
-                                <span id="practice-hold-label">0.0s / {{ $practiceConfig['holdSeconds'] }}s</span>
+                            <div class="mb-1.5 flex items-center justify-between text-xs text-gray-500">
+                                <span class="font-medium">{{ __('Hold progress') }}</span>
+                                <span id="practice-hold-label" class="font-semibold tabular-nums">0.0s / {{ $practiceConfig['holdSeconds'] }}s</span>
                             </div>
-                            <div class="h-2.5 w-full overflow-hidden rounded-full bg-gray-200">
-                                <div id="practice-hold-bar" class="h-full w-0 bg-teal-500 transition-all duration-300"></div>
+                            <div class="h-3 w-full overflow-hidden rounded-full bg-gray-100 ring-1 ring-inset ring-gray-900/5">
+                                <div id="practice-hold-bar" class="h-full w-0 rounded-full bg-gradient-to-r from-teal-500 to-emerald-400 transition-all duration-300"></div>
                             </div>
                         </div>
 
-                        <div id="practice-message" class="mt-4 rounded-lg bg-gray-50 p-3 text-sm text-gray-600">
+                        <div id="practice-message" aria-live="polite" class="mt-4 rounded-xl bg-gray-50 p-3 text-sm text-gray-600">
                             {{ __('Press Start, then show your') }} {{ $prescription->mudra->name }} {{ __('mudra to the camera.') }}
                         </div>
 
@@ -187,17 +212,21 @@
                     {{-- Target mudra --}}
                     <x-card>
                         <div class="text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Target Mudra') }}</div>
-                        <div class="mt-2 flex items-center gap-3">
-                            <div class="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-teal-50 text-3xl">
+                        <div class="mt-3 flex items-center gap-4">
+                            <div class="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-teal-50 text-3xl ring-1 ring-gray-900/5">
                                 @if ($prescription->mudra->reference_image_path)
                                     <img src="{{ asset($prescription->mudra->reference_image_path) }}" alt="{{ $prescription->mudra->name }}" class="h-full w-full object-cover">
                                 @else
                                     {{ $guide['symbol'] }}
                                 @endif
                             </div>
-                            <div>
-                                <div class="font-semibold text-gray-900">{{ $prescription->mudra->name }}</div>
-                                <div class="text-xs text-gray-500">{{ $prescription->mudra->description }}</div>
+                            <div class="min-w-0">
+                                <div class="font-bold text-gray-900">{{ $prescription->mudra->name }}</div>
+                                <div class="mt-0.5 text-xs leading-relaxed text-gray-500">{{ $prescription->mudra->description }}</div>
+                                <a href="#mudra-guide" class="mt-1.5 inline-flex items-center gap-1 text-xs font-semibold text-teal-700 hover:text-teal-800">
+                                    {{ __('See steps') }}
+                                    <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+                                </a>
                             </div>
                         </div>
                     </x-card>
