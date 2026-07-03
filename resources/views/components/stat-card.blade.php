@@ -2,6 +2,7 @@
     'label' => '',
     'value' => '',
     'icon' => null,
+    'skeleton' => false,
 ])
 
 @php
@@ -19,22 +20,36 @@
     $path = $paths[$icon] ?? null;
 @endphp
 
-<div {{ $attributes->merge(['class' => 'group relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-5 shadow-sm ring-1 ring-gray-900/[0.03] transition duration-200 hover:-translate-y-0.5 hover:shadow-md']) }}>
-    <div class="flex items-start justify-between gap-3">
-        <div class="min-w-0">
-            <div class="text-xs font-semibold uppercase tracking-wide text-gray-400">{{ $label }}</div>
-            <div class="mt-2 truncate text-2xl font-extrabold tracking-tight text-gray-900">{{ $value }}</div>
-        </div>
-        @if ($path)
-            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-emerald-500 text-white shadow-sm shadow-teal-600/25">
-                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $path }}" /></svg>
+<div {{ $attributes->merge(['class' => 'group relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border border-gray-100 bg-white p-5 shadow-sm ring-1 ring-gray-900/[0.03] transition duration-200 hover:-translate-y-0.5 hover:shadow-md']) }}>
+    @if ($skeleton)
+        {{-- Loading skeleton --}}
+        <div class="animate-pulse" aria-hidden="true">
+            <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0 flex-1">
+                    <div class="h-3 w-20 rounded bg-gray-100"></div>
+                    <div class="mt-3 h-7 w-14 rounded bg-gray-200"></div>
+                </div>
+                <div class="h-11 w-11 shrink-0 rounded-xl bg-gray-100"></div>
             </div>
-        @elseif ($icon)
-            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-teal-50 text-lg">{{ $icon }}</div>
-        @endif
-    </div>
+            <div class="mt-3 h-3 w-28 rounded bg-gray-100"></div>
+        </div>
+    @else
+        <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+                <div class="text-xs font-semibold uppercase tracking-wide text-gray-400">{{ $label }}</div>
+                <div class="mt-2 truncate text-2xl font-extrabold tabular-nums tracking-tight text-gray-900">{{ $value }}</div>
+            </div>
+            @if ($path)
+                <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-emerald-500 text-white shadow-sm shadow-teal-600/25 transition-transform duration-200 group-hover:scale-110">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $path }}" /></svg>
+                </div>
+            @elseif ($icon)
+                <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-teal-50 text-lg">{{ $icon }}</div>
+            @endif
+        </div>
 
-    @isset($footer)
-        <div class="mt-3 text-sm text-gray-500">{{ $footer }}</div>
-    @endisset
+        @isset($footer)
+            <div class="mt-3 text-xs font-medium text-gray-400">{{ $footer }}</div>
+        @endisset
+    @endif
 </div>
