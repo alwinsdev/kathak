@@ -29,7 +29,7 @@
                         <h3 class="mt-1 text-2xl font-extrabold tracking-tight text-gray-900">{{ $prescription->mudra->name }}</h3>
                         <p class="mt-2 leading-relaxed text-gray-600">{{ $prescription->mudra->description }}</p>
                         @if ($prescription->mudra->benefits)
-                            <div class="mt-4 inline-flex items-start gap-2 rounded-xl bg-green-50 px-4 py-2.5 text-sm text-green-800">
+                            <div class="mt-4 inline-flex items-start gap-2 rounded-xl bg-emerald-50 px-4 py-2.5 text-sm text-emerald-800">
                                 <svg class="mt-0.5 h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
                                 <span>{{ $prescription->mudra->benefits }}</span>
                             </div>

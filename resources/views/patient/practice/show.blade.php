@@ -64,8 +64,8 @@
                         <div id="practice-camera-pill"
                              class="absolute left-3 top-3 hidden items-center gap-1.5 rounded-full bg-black/55 px-3 py-1 text-xs font-medium text-white backdrop-blur">
                             <span class="relative flex h-2 w-2">
-                                <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-70"></span>
-                                <span class="relative inline-flex h-2 w-2 rounded-full bg-green-400"></span>
+                                <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-70"></span>
+                                <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-400"></span>
                             </span>
                             {{ __('Camera Active') }}
                         </div>
@@ -126,7 +126,7 @@
                                 <div class="text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Common mistakes') }}</div>
                                 <ul class="mt-2 space-y-2 text-sm text-gray-700">
                                     @foreach ($guide['mistakes'] as $mistake)
-                                        <li class="flex gap-2"><span class="text-red-500">✗</span><span>{{ $mistake }}</span></li>
+                                        <li class="flex gap-2"><span class="text-rose-500">✗</span><span>{{ $mistake }}</span></li>
                                     @endforeach
                                 </ul>
                             </div>
@@ -158,7 +158,7 @@
                             </div>
 
                             <a href="{{ route('patient.dashboard') }}"
-                               class="mt-4 block w-full rounded-md bg-teal-600 px-4 py-2.5 text-center font-medium text-white hover:bg-teal-700">
+                               class="mt-4 block w-full rounded-xl bg-teal-600 px-4 py-2.5 text-center font-semibold text-white shadow-sm shadow-teal-600/20 transition hover:bg-teal-700">
                                 {{ __('Back to today') }}
                             </a>
                         </x-card>

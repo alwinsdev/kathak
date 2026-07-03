@@ -5,12 +5,12 @@
 @php
     $styles = [
         'info' => 'bg-blue-50 border-blue-400 text-blue-800',
-        'success' => 'bg-green-50 border-green-500 text-green-800',
-        'warning' => 'bg-orange-50 border-orange-400 text-orange-800',
-        'error' => 'bg-red-50 border-red-500 text-red-800',
+        'success' => 'bg-emerald-50 border-emerald-500 text-emerald-800',
+        'warning' => 'bg-amber-50 border-amber-400 text-amber-800',
+        'error' => 'bg-rose-50 border-rose-500 text-rose-800',
     ][$type] ?? 'bg-blue-50 border-blue-400 text-blue-800';
 @endphp
 
-<div {{ $attributes->merge(['class' => "border-l-4 rounded-md px-4 py-3 text-sm {$styles}"]) }}>
+<div {{ $attributes->merge(['class' => "border-l-4 rounded-xl px-4 py-3 text-sm {$styles}"]) }} role="status">
     {{ $slot }}
 </div>
