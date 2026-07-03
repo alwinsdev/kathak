@@ -30,7 +30,7 @@ class PracticeHistoryService
     /**
      * All verified sessions grouped by calendar day, for the activity calendar.
      *
-     * @return array<string, list<array{mudra: string, confidence: float|null}>>
+     * @return array<string, list<array{mudra: string, image: string|null, confidence: float|null}>>
      */
     public function calendar(User $patient): array
     {
@@ -40,6 +40,9 @@ class PracticeHistoryService
             ->groupBy(fn ($session) => $session->practiced_on->toDateString())
             ->map(fn ($group) => $group->map(fn ($session) => [
                 'mudra' => $session->prescription?->mudra?->name ?? '—',
+                'image' => ($image = $session->prescription?->mudra?->reference_image_path)
+                    ? asset($image)
+                    : null,
                 'confidence' => $session->best_confidence !== null
                     ? round((float) $session->best_confidence * 100, 1)
                     : null,
