@@ -7,11 +7,14 @@ namespace App\Http\Controllers\Doctor;
 use App\Enums\PrescriptionStatus;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Repositories\PracticeSessionRepository;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
+    public function __construct(private readonly PracticeSessionRepository $sessions) {}
+
     /**
      * The doctor's panel: only patients assigned to this doctor.
      */
@@ -24,7 +27,11 @@ class DashboardController extends Controller
             ->with('patientProfile')
             ->withCount(['prescriptions as active_prescriptions_count' => fn ($query) => $query->where('status', PrescriptionStatus::Active->value)])
             ->orderBy('name')
-            ->get();
+            ->get()
+            ->each(fn (User $patient) => $patient->setAttribute(
+                'last_practice_date',
+                $this->sessions->lastVerifiedDate($patient),
+            ));
 
         return view('doctor.dashboard', [
             'patients' => $patients,

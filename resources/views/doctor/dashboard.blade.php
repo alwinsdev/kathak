@@ -34,6 +34,7 @@
                                 <th class="px-6 py-3 font-semibold">{{ __('Patient') }}</th>
                                 <th class="px-6 py-3 font-semibold">{{ __('Condition') }}</th>
                                 <th class="px-6 py-3 font-semibold">{{ __('Active') }}</th>
+                                <th class="px-6 py-3 font-semibold">{{ __('Last practice') }}</th>
                                 <th class="px-6 py-3"></th>
                             </tr>
                         </thead>
@@ -49,6 +50,18 @@
                                     </td>
                                     <td class="px-6 py-4">
                                         <x-badge color="teal">{{ $patient->active_prescriptions_count }}</x-badge>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        @if ($patient->last_practice_date?->isToday())
+                                            <span class="inline-flex items-center gap-1 rounded-full bg-teal-100 px-2.5 py-0.5 text-xs font-semibold text-teal-700">
+                                                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                                {{ __('Today') }}
+                                            </span>
+                                        @elseif ($patient->last_practice_date)
+                                            <span class="text-gray-600">{{ $patient->last_practice_date->format('d M Y') }}</span>
+                                        @else
+                                            <span class="text-gray-400">—</span>
+                                        @endif
                                     </td>
                                     <td class="px-6 py-4 text-right">
                                         <a href="{{ route('doctor.patients.show', $patient) }}"

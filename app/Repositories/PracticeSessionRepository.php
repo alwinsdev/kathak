@@ -68,6 +68,37 @@ class PracticeSessionRepository
     }
 
     /**
+     * Distinct dates (Y-m-d) the patient practised on within the last $days
+     * days (including today). Used for adherence displays.
+     *
+     * @return Collection<int, string>
+     */
+    public function verifiedDatesInLastDays(User $patient, int $days): Collection
+    {
+        return PracticeSession::query()
+            ->where('patient_id', $patient->id)
+            ->verified()
+            ->whereDate('practiced_on', '>=', Carbon::today()->subDays($days - 1))
+            ->pluck('practiced_on')
+            ->map(fn ($date) => Carbon::parse($date)->toDateString())
+            ->unique()
+            ->values();
+    }
+
+    /**
+     * The most recent date the patient had a verified session, if any.
+     */
+    public function lastVerifiedDate(User $patient): ?Carbon
+    {
+        $date = PracticeSession::query()
+            ->where('patient_id', $patient->id)
+            ->verified()
+            ->max('practiced_on');
+
+        return $date ? Carbon::parse($date) : null;
+    }
+
+    /**
      * The patient's most recent verified sessions, newest first.
      *
      * @return Collection<int, PracticeSession>
