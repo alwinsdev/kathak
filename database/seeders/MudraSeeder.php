@@ -35,7 +35,14 @@ class MudraSeeder extends Seeder
             ['name' => 'Trishool', 'ai' => 'trishool', 'description' => 'Index, middle and ring fingers raised like a trident, thumb and little finger folded.', 'benefits' => 'Strengthens three-finger extension.'],
         ];
 
+        // Real reference photos exist for the mudras the model is trained on.
+        $withPhoto = ['shikhar', 'pataka', 'soochi', 'trishool', 'mayur', 'shuktund'];
+
         foreach ($mudras as $mudra) {
+            $image = in_array($mudra['ai'], $withPhoto, true)
+                ? "images/mudras/{$mudra['ai']}.jpg"
+                : null;
+
             Mudra::updateOrCreate(
                 ['slug' => Str::slug($mudra['name'])],
                 [
@@ -43,6 +50,7 @@ class MudraSeeder extends Seeder
                     'description' => $mudra['description'],
                     'benefits' => $mudra['benefits'],
                     'ai_class_label' => $mudra['ai'],
+                    'reference_image_path' => $image,
                     'is_active' => true,
                 ],
             );
