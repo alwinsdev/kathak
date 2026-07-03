@@ -4,21 +4,26 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Doctor;
 
+use App\Enums\PrescriptionStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Mudra;
 use App\Models\User;
 use App\Repositories\PracticeSessionRepository;
+use App\Services\Patient\PracticeHistoryService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 class PatientController extends Controller
 {
-    public function __construct(private readonly PracticeSessionRepository $sessions) {}
+    public function __construct(
+        private readonly PracticeSessionRepository $sessions,
+        private readonly PracticeHistoryService $history,
+    ) {}
 
     /**
-     * Show one of the doctor's own patients with their active prescriptions
-     * and practice adherence (read-only).
+     * The doctor's clinical workspace for one patient: active prescriptions
+     * plus read-only practice context (adherence, stats, recent activity).
      */
     public function show(User $patient): View
     {
@@ -30,6 +35,13 @@ class PatientController extends Controller
             ->active()
             ->with('mudra')
             ->orderBy('scheduled_time')
+            ->get();
+
+        $previousPrescriptions = $patient->prescriptions()
+            ->whereIn('status', [PrescriptionStatus::Cancelled->value, PrescriptionStatus::Completed->value])
+            ->with('mudra')
+            ->latest('updated_at')
+            ->limit(5)
             ->get();
 
         $mudras = Mudra::active()->orderBy('name')->get();
@@ -52,10 +64,13 @@ class PatientController extends Controller
         return view('doctor.patients.show', [
             'patient' => $patient,
             'prescriptions' => $prescriptions,
+            'previousPrescriptions' => $previousPrescriptions,
             'mudras' => $mudras,
             'doneTodayIds' => $doneTodayIds,
             'adherence' => $adherence,
             'lastPractice' => $this->sessions->lastVerifiedDate($patient),
+            'stats' => $this->history->stats($patient),
+            'recentActivity' => $this->sessions->recentVerified($patient, 6),
         ]);
     }
 }
