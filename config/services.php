@@ -52,11 +52,20 @@ return [
         'url' => env('MEDIAPIPE_URL', 'http://localhost:8001'),
         'key' => env('MEDIAPIPE_API_KEY'),
 
-        // Maps the AI service's hand-shape labels to mudra classes
-        // (mudras.ai_class_label). Fully configurable — no mapping in code.
+        // Maps the AI service's labels to mudra classes (mudras.ai_class_label).
+        // The rule-based engine emits hand-shape labels (open_palm/closed_fist);
+        // the trained YOLO engine emits mudra tokens directly (identity mapping).
         'label_map' => [
+            // rule-based engine
             'open_palm' => 'shuktund',
             'closed_fist' => 'shikhar',
+            // YOLO engine (trained mudra classes)
+            'shikhar' => 'shikhar',
+            'shuktund' => 'shuktund',
+            'pataka' => 'pataka',
+            'mayur' => 'mayur',
+            'soochi' => 'soochi',
+            'trishool' => 'trishool',
         ],
     ],
 

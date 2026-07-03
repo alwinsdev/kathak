@@ -1,13 +1,16 @@
 """Per-class precision/recall/F1 for the trained classifier on val+test splits."""
 
+import sys
 from collections import Counter
 from pathlib import Path
 
 from ultralytics import YOLO
 
 ROOT = Path(__file__).resolve().parents[1]
-DS = ROOT / "datasets" / "kathak_cls"
-model = YOLO(str(ROOT / "runs" / "kathak_cls" / "weights" / "best.pt"))
+# args: [cls_dataset_dir] [model_path]
+DS = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "datasets" / "kathak_cls"
+model_path = sys.argv[2] if len(sys.argv) > 2 else str(ROOT / "runs" / "kathak_cls" / "weights" / "best.pt")
+model = YOLO(model_path)
 names = model.names
 
 tp, fp, fn = Counter(), Counter(), Counter()

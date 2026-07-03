@@ -13,11 +13,7 @@ use Illuminate\Database\Seeder;
 class PrescriptionSeeder extends Seeder
 {
     /**
-     * Give the demo patient active prescriptions from their doctor.
-     *
-     * The POC's self-hosted MediaPipe classifier verifies two distinct hand
-     * shapes — an open spread hand (Shukatunda) and a closed fist (Shikhara) —
-     * so the demo prescribes exactly those, keeping every card completable.
+     * Give the demo patient a couple of active prescriptions from their doctor.
      */
     public function run(): void
     {
@@ -29,9 +25,14 @@ class PrescriptionSeeder extends Seeder
 
         $doctorId = $patient->patientProfile->doctor_id;
 
+        // The self-hosted YOLO classifier is trained on these six mudras.
         $plan = [
-            ['mudra' => 'shukatunda', 'time' => '08:00', 'duration' => 10, 'notes' => 'Open your hand and spread all fingers, palm facing the camera.'],
-            ['mudra' => 'shikhara', 'time' => '12:00', 'duration' => 10, 'notes' => 'Make a closed fist facing the camera and hold it steady.'],
+            ['mudra' => 'shikhara', 'time' => '08:00', 'duration' => 10, 'notes' => 'Make a closed fist facing the camera and hold it steady.'],
+            ['mudra' => 'pataka', 'time' => '09:00', 'duration' => 10, 'notes' => 'Open flat palm, fingers together, held upright to the camera.'],
+            ['mudra' => 'soochi', 'time' => '10:00', 'duration' => 10, 'notes' => 'Point the index finger straight up, fold the other fingers.'],
+            ['mudra' => 'trishool', 'time' => '11:00', 'duration' => 10, 'notes' => 'Raise index, middle and ring fingers like a trident.'],
+            ['mudra' => 'mayura', 'time' => '12:00', 'duration' => 10, 'notes' => 'Touch the ring-finger tip to the thumb tip, other fingers extended.'],
+            ['mudra' => 'shukatunda', 'time' => '13:00', 'duration' => 10, 'notes' => 'Open your hand and spread all fingers to the camera.'],
         ];
 
         foreach ($plan as $item) {

@@ -150,4 +150,26 @@ return [
         'mistakes' => ['Fingers held together', 'Hand turned sideways', 'Hand too far / out of frame'],
     ],
 
+    'soochi' => [
+        'symbol' => '☝️',
+        'steps' => [
+            'Point the index finger straight up.',
+            'Fold the middle, ring and little fingers into the palm.',
+            'Rest the thumb against the folded fingers.',
+            'Face the hand to the camera and hold steady.',
+        ],
+        'mistakes' => ['More than one finger raised', 'Index finger bent', 'Hand out of frame'],
+    ],
+
+    'trishool' => [
+        'symbol' => '🤟',
+        'steps' => [
+            'Raise the index, middle and ring fingers like a trident.',
+            'Fold the thumb and little finger down.',
+            'Keep the three fingers straight and slightly apart.',
+            'Face the hand to the camera and hold steady.',
+        ],
+        'mistakes' => ['Little finger sticking up', 'Fingers bent', 'Hand tilted away'],
+    ],
+
 ];

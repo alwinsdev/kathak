@@ -20,8 +20,6 @@ class MudraSeeder extends Seeder
      */
     public function run(): void
     {
-        // `image` is set only for the two gestures the self-hosted MediaPipe
-        // rule-based classifier can verify in this POC (open hand & fist).
         $mudras = [
             ['name' => 'Pataka', 'ai' => 'pataka', 'description' => 'Open palm, fingers extended and held together, thumb bent.', 'benefits' => 'Improves wrist flexibility & finger coordination.'],
             ['name' => 'Tripataka', 'ai' => 'tripataka', 'description' => 'Like Pataka but ring finger bent.', 'benefits' => 'Strengthens fine motor control.'],
@@ -30,9 +28,11 @@ class MudraSeeder extends Seeder
             ['name' => 'Mayura', 'ai' => 'mayur', 'description' => 'Ring finger touches thumb tip, others extended.', 'benefits' => 'Calming, improves focus.'],
             ['name' => 'Ardhachandra', 'ai' => 'ardhachandra', 'description' => 'Hand in crescent shape, thumb stretched out.', 'benefits' => 'Stretches palm & opens chest posture.'],
             ['name' => 'Arala', 'ai' => 'aral', 'description' => 'Index curved, others slightly bent.', 'benefits' => 'Loosens stiff fingers.'],
-            ['name' => 'Shukatunda', 'ai' => 'shuktund', 'description' => 'Open hand with fingers spread apart, facing the camera.', 'benefits' => 'Targets joint stiffness & finger spread.', 'image' => 'images/mudras/shuktund.svg'],
+            ['name' => 'Shukatunda', 'ai' => 'shuktund', 'description' => 'Open hand with fingers spread apart, facing the camera.', 'benefits' => 'Targets joint stiffness & finger spread.'],
             ['name' => 'Mushti', 'ai' => 'mushti', 'description' => 'Closed fist with thumb on top.', 'benefits' => 'Builds grip strength.'],
-            ['name' => 'Shikhara', 'ai' => 'shikhar', 'description' => 'Closed fist held up, facing the camera.', 'benefits' => 'Stabilizes wrist, builds strength.', 'image' => 'images/mudras/shikhar.svg'],
+            ['name' => 'Shikhara', 'ai' => 'shikhar', 'description' => 'Closed fist held up, facing the camera.', 'benefits' => 'Stabilizes wrist, builds strength.'],
+            ['name' => 'Soochi', 'ai' => 'soochi', 'description' => 'Index finger pointing straight up, other fingers folded.', 'benefits' => 'Improves index-finger control & focus.'],
+            ['name' => 'Trishool', 'ai' => 'trishool', 'description' => 'Index, middle and ring fingers raised like a trident, thumb and little finger folded.', 'benefits' => 'Strengthens three-finger extension.'],
         ];
 
         foreach ($mudras as $mudra) {
@@ -43,7 +43,6 @@ class MudraSeeder extends Seeder
                     'description' => $mudra['description'],
                     'benefits' => $mudra['benefits'],
                     'ai_class_label' => $mudra['ai'],
-                    'reference_image_path' => $mudra['image'] ?? null,
                     'is_active' => true,
                 ],
             );
