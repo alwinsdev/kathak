@@ -66,6 +66,8 @@ return [
             'mayur' => 'mayur',
             'soochi' => 'soochi',
             'trishool' => 'trishool',
+            'ardhpataka' => 'ardhpataka',
+            'mushti' => 'mushti',
         ],
     ],
 
