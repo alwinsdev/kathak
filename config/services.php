@@ -68,6 +68,10 @@ return [
             'trishool' => 'trishool',
             'ardhpataka' => 'ardhpataka',
             'mushti' => 'mushti',
+            'aral' => 'aral',
+            'ardhachandra' => 'ardhachandra',
+            'kartarimukh' => 'kartarimukh',
+            'tripataka' => 'tripataka',
         ],
     ],
 

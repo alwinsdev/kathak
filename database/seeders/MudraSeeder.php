@@ -36,7 +36,7 @@ class MudraSeeder extends Seeder
         ];
 
         // Real reference photos exist for the mudras the model is trained on.
-        $withPhoto = ['shikhar', 'pataka', 'soochi', 'trishool', 'mayur', 'shuktund', 'ardhpataka', 'mushti'];
+        $withPhoto = ['shikhar', 'pataka', 'soochi', 'trishool', 'mayur', 'shuktund', 'ardhpataka', 'mushti', 'aral', 'ardhachandra', 'kartarimukh', 'tripataka'];
 
         foreach ($mudras as $mudra) {
             $image = in_array($mudra['ai'], $withPhoto, true)

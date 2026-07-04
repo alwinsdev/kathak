@@ -31,16 +31,22 @@ Paths used below:
 
 ---
 
-## 0. Start the MediaPipe hand detector (port 8002)
+## 0. Start the MediaPipe hand detector (port 8002) — local Python, no Docker
 
 Needed both to **crop webcam captures** and to **serve** predictions.
+Runs in the dedicated `mp` conda env (Python 3.11, where mediapipe has wheels).
 
 ```powershell
-docker rm -f mp-detect 2>$null
-docker run -d --name mp-detect -p 8002:8001 -e API_KEY=change-me -e DETECTION_CONFIDENCE=0.3 mediapipe-ai:dev
-# check:
+cd C:\xampp\htdocs\kathak\ai-service
+$env:API_KEY='change-me'; $env:DETECTION_CONFIDENCE='0.3'
+& C:\Users\iamal\miniconda3\envs\mp\python.exe -m uvicorn app.main:app --host 0.0.0.0 --port 8002
+# check (new terminal):
 curl.exe -s http://localhost:8002/health
 ```
+
+> One-time setup (already done): `conda create -y -n mp python=3.11`, then
+> `pip install fastapi "uvicorn[standard]" pydantic pydantic-settings python-multipart "mediapipe>=0.10.14,<0.11" pillow "numpy>=1.26,<2"`,
+> and `models/hand_landmarker.task` downloaded from the MediaPipe model zoo.
 
 ---
 
