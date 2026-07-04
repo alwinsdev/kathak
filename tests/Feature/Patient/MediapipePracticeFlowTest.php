@@ -36,7 +36,7 @@ class MediapipePracticeFlowTest extends TestCase
             'services.inference.driver' => 'mediapipe',
             'services.mediapipe.url' => 'http://ai.test',
             'services.mediapipe.key' => 'test-key',
-            'services.mediapipe.label_map' => [
+            'services.mediapipe.temporary_poc_model_mapping' => [
                 'open_palm' => 'shuktund',
                 'closed_fist' => 'shikhar',
             ],

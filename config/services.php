@@ -53,15 +53,29 @@ return [
         'key' => env('MEDIAPIPE_API_KEY'),
 
         /*
-        | Internal mapping layer: raw YOLO class -> Siddha mudra label
-        | (mudras.ai_class_label). The model's internal class vocabulary is an
-        | implementation detail and must never surface in the UI, API, or
-        | database — only the Siddha labels on the right-hand side exist there.
-        | Any model output NOT listed here is treated as an incorrect mudra.
+        |----------------------------------------------------------------------
+        | TEMPORARY POC MODEL MAPPING  (Bharatanatyam -> Siddha)
+        |----------------------------------------------------------------------
+        |
+        | WHY THIS EXISTS: the current YOLO classifier was trained on a
+        | Bharatanatyam/Kathak hand-gesture dataset as a temporary experiment,
+        | so the model's internal class vocabulary uses Bharatanatyam names.
+        | This application is a SIDDHA Mudra Therapy product and must expose
+        | Siddha mudra names ONLY — in the UI, API responses, database and
+        | logs. This map is the single translation point: raw model class
+        | (left) -> Siddha label stored in mudras.ai_class_label (right).
+        |
+        | Any model output NOT listed here is reported as a generic
+        | "incorrect mudra" and can never match a prescription. The raw model
+        | class names must never be referenced anywhere else in the codebase.
+        |
+        | REMOVAL PLAN: delete this mapping (and use identity labels) once a
+        | dedicated Siddha Mudra model is trained whose classes ARE the Siddha
+        | labels themselves.
         */
-        'label_map' => [
-            // The Aakash Mudra pose (fingertip-to-thumb pinch, other fingers
-            // extended) corresponds to this internal model class.
+        'temporary_poc_model_mapping' => [
+            // Aakash Mudra (ஆகாய முத்திரை): fingertip-to-thumb pinch with the
+            // other fingers extended — matches this internal model class.
             'mayur' => 'aakash',
         ],
     ],

@@ -63,10 +63,17 @@ class MediapipeInferenceClient implements InferenceClient
         ]);
     }
 
-    /** Translate an AI-service label to a mudra class via the configured map. */
+    /**
+     * TEMPORARY POC MAPPING: translate a raw model class to a Siddha mudra
+     * label. The current YOLO model was trained on Bharatanatyam classes as a
+     * stop-gap; the application exposes Siddha names only, so this is the one
+     * boundary where the model's vocabulary is allowed to appear. Remove once
+     * a dedicated Siddha Mudra model (with Siddha class names) is trained —
+     * see services.mediapipe.temporary_poc_model_mapping.
+     */
     private function mapLabel(string $label): ?string
     {
-        $map = (array) config('services.mediapipe.label_map', []);
+        $map = (array) config('services.mediapipe.temporary_poc_model_mapping', []);
 
         return $map[$label] ?? null;
     }
