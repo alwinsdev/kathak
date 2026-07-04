@@ -18,6 +18,21 @@ declare(strict_types=1);
 
 return [
 
+    'aakash' => [
+        'symbol' => '🌌',
+        'steps' => [
+            'Touch the tip of your middle finger to the tip of your thumb.',
+            'Keep the index, ring and little fingers straight and relaxed.',
+            'Face your palm towards the camera.',
+            'Hold the gesture steady until the bar fills.',
+        ],
+        'mistakes' => [
+            'Using the wrong finger to touch the thumb',
+            'Curling the extended fingers',
+            'Hand too far away or out of frame',
+        ],
+    ],
+
     'default' => [
         'symbol' => '🧘',
         'steps' => [

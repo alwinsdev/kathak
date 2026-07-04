@@ -52,26 +52,17 @@ return [
         'url' => env('MEDIAPIPE_URL', 'http://localhost:8001'),
         'key' => env('MEDIAPIPE_API_KEY'),
 
-        // Maps the AI service's labels to mudra classes (mudras.ai_class_label).
-        // The rule-based engine emits hand-shape labels (open_palm/closed_fist);
-        // the trained YOLO engine emits mudra tokens directly (identity mapping).
+        /*
+        | Internal mapping layer: raw YOLO class -> Siddha mudra label
+        | (mudras.ai_class_label). The model's internal class vocabulary is an
+        | implementation detail and must never surface in the UI, API, or
+        | database — only the Siddha labels on the right-hand side exist there.
+        | Any model output NOT listed here is treated as an incorrect mudra.
+        */
         'label_map' => [
-            // rule-based engine
-            'open_palm' => 'shuktund',
-            'closed_fist' => 'shikhar',
-            // YOLO engine (trained mudra classes)
-            'shikhar' => 'shikhar',
-            'shuktund' => 'shuktund',
-            'pataka' => 'pataka',
-            'mayur' => 'mayur',
-            'soochi' => 'soochi',
-            'trishool' => 'trishool',
-            'ardhpataka' => 'ardhpataka',
-            'mushti' => 'mushti',
-            'aral' => 'aral',
-            'ardhachandra' => 'ardhachandra',
-            'kartarimukh' => 'kartarimukh',
-            'tripataka' => 'tripataka',
+            // The Aakash Mudra pose (fingertip-to-thumb pinch, other fingers
+            // extended) corresponds to this internal model class.
+            'mayur' => 'aakash',
         ],
     ],
 

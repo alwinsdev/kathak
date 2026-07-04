@@ -20,6 +20,13 @@ use Throwable;
  */
 class MediapipeInferenceClient implements InferenceClient
 {
+    /**
+     * Generic class for detections that map to no prescribed mudra. Keeps the
+     * model's internal vocabulary out of the application while still letting
+     * the UI distinguish "incorrect mudra" from "no hand detected".
+     */
+    public const INCORRECT = 'other';
+
     public function detect(string $imageBinary): InferenceResult
     {
         $url = config('services.mediapipe.url');
@@ -46,10 +53,10 @@ class MediapipeInferenceClient implements InferenceClient
             return new InferenceResult([]); // no hand detected
         }
 
-        $class = $this->mapLabel((string) $prediction['label']);
-        if ($class === null) {
-            return new InferenceResult([]); // unmapped/unknown label -> no match
-        }
+        // Internal mapping layer: raw model class -> Siddha mudra label. An
+        // unmapped class is reported generically so the raw token never leaves
+        // this boundary.
+        $class = $this->mapLabel((string) $prediction['label']) ?? self::INCORRECT;
 
         return new InferenceResult([
             new MudraPrediction($class, (float) ($prediction['confidence'] ?? 0)),

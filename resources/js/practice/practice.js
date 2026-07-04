@@ -32,8 +32,6 @@ const swap = (element, key, state) => {
     element.classList.add(...STATES[state][key].split(' '));
 };
 
-const titleCase = (token) => (token ? token.charAt(0).toUpperCase() + token.slice(1) : '');
-
 function boot() {
     const root = document.getElementById('practice-root');
     if (!root) return;
@@ -233,10 +231,11 @@ function boot() {
             setCompare(null);
             setMessage(`Right mudra! Adjust your pose to pass ${Math.round(threshold * 100)}% confidence.`);
         } else if (detectedToken) {
-            // A different mudra was recognised — show the comparison.
+            // A hand was recognised but it is not the prescribed mudra. The
+            // internal class name is never shown — only a generic state.
             setState('wrong', 'Try again', topPct);
-            setCompare(titleCase(detectedToken));
-            setMessage(`That looks like ${titleCase(detectedToken)} — show your ${target} mudra.`);
+            setCompare('Incorrect mudra');
+            setMessage(`That doesn't look right — adjust your hand to match the ${target}.`);
         } else {
             setState('search', 'Searching…');
             setCompare(null);

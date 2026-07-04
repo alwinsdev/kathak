@@ -60,18 +60,21 @@ class MediapipeInferenceClientTest extends TestCase
             && str_contains($request->url(), '/classify'));
     }
 
-    public function test_unmapped_label_yields_no_prediction(): void
+    public function test_unmapped_label_is_reported_as_generic_incorrect_class(): void
     {
         $this->fakeClassify([
             'success' => true,
-            'prediction' => ['label' => 'unknown', 'confidence' => 0.0],
+            'prediction' => ['label' => 'unknown', 'confidence' => 0.9],
             'hands_detected' => 1,
             'processing_time_ms' => 5,
         ]);
 
         $result = (new MediapipeInferenceClient)->detect('binary-image');
 
-        $this->assertNull($result->topPrediction());
+        // The raw model class never leaves the mapping layer — it becomes the
+        // generic incorrect marker, and it can never match a prescribed mudra.
+        $this->assertSame(MediapipeInferenceClient::INCORRECT, $result->topClass());
+        $this->assertSame(0.0, $result->confidenceFor('aakash'));
     }
 
     public function test_no_hand_yields_no_prediction(): void
