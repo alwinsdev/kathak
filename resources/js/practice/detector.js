@@ -51,7 +51,7 @@ export class DetectionLoop {
             try {
                 await this.detectOnce();
             } catch (error) {
-                this.onError?.(error);
+                if (this.running) this.onError?.(error);
             } finally {
                 this.busy = false;
             }
@@ -64,7 +64,7 @@ export class DetectionLoop {
 
     async detectOnce() {
         const blob = await this.camera.captureFrame();
-        if (!blob) {
+        if (!blob || !this.running) {
             return;
         }
 
@@ -76,6 +76,12 @@ export class DetectionLoop {
             headers: { 'X-CSRF-TOKEN': csrfToken(), Accept: 'application/json' },
             body,
         });
+
+        // The user may have pressed Stop while the request was in flight —
+        // discard the late response instead of overwriting the stopped UI.
+        if (!this.running) {
+            return;
+        }
 
         if (!response.ok) {
             let message = `Detection failed (HTTP ${response.status})`;
