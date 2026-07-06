@@ -43,7 +43,7 @@ def test_closed_fist_is_recognized() -> None:
 
 
 def test_midrange_mean_curl_is_unknown() -> None:
-    result = RuleBasedMudraClassifier().classify(_features(_uniform(48.0)))
+    result = RuleBasedMudraClassifier().classify(_features(_uniform(70.0)))
     assert result.label == "unknown"
     assert result.confidence == 0.0
 
