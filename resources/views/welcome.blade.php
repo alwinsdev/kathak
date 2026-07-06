@@ -4,6 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ config('app.name') }}</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/logo-icon-dark.png') }}">
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800&display=swap" rel="stylesheet" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -93,7 +97,7 @@
                         </div>
 
                         <div class="mt-4 flex items-center gap-3 rounded-xl border border-gray-100 p-3">
-                            <img src="{{ asset('images/mudras/soochi.jpg') }}" alt="" class="h-12 w-12 rounded-lg object-cover ring-1 ring-gray-900/5">
+                            <img src="{{ asset('images/mudras/aakash.jpg') }}" alt="" class="h-12 w-12 rounded-lg object-cover ring-1 ring-gray-900/5">
                             <div class="min-w-0">
                                 <div class="text-xs font-semibold uppercase tracking-wide text-gray-400">{{ __('Target Mudra') }}</div>
                                 <div class="text-sm font-bold text-gray-900">Soochi</div>
@@ -181,40 +185,28 @@
                 </div>
             </section>
 
-            {{-- CTA --}}
-            @guest
-                <section class="mx-auto w-full max-w-6xl px-6 py-14 text-center" aria-labelledby="cta-title">
-                    <h2 id="cta-title" class="text-2xl font-extrabold tracking-tight text-gray-900">{{ __('Start your therapy today') }}</h2>
-                    <p class="mx-auto mt-2 max-w-md text-gray-500">{{ __('Create your patient account, choose your doctor, and begin practising.') }}</p>
-                    <div class="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
-                        <a href="{{ route('register') }}"
-                           class="w-full rounded-xl bg-teal-600 px-7 py-3.5 font-semibold text-white shadow-lg shadow-teal-600/25 transition hover:-translate-y-0.5 hover:bg-teal-700 sm:w-auto">
-                            {{ __('Register as Patient') }}
-                        </a>
-                        <a href="{{ route('login') }}"
-                           class="w-full rounded-xl px-7 py-3.5 font-semibold text-gray-600 transition hover:text-teal-700 sm:w-auto">
-                            {{ __('Login to Account') }}
-                        </a>
-                    </div>
-                </section>
-            @endguest
         </main>
 
         {{-- Footer --}}
         <footer class="border-t border-gray-100 bg-white/60">
-            <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-6 py-8 text-sm text-gray-400 sm:flex-row">
-                <div class="flex items-center gap-2.5">
-                    <x-application-logo class="h-7 w-7" />
-                    <span class="font-semibold text-gray-600">{{ config('app.name') }}</span>
-                    <span aria-hidden="true">·</span>
-                    <span>{{ __('Proof of Concept') }}</span>
-                </div>
-                @guest
-                    <nav class="flex items-center gap-4" aria-label="{{ __('Footer') }}">
-                        <a href="{{ route('login') }}" class="transition hover:text-teal-700">{{ __('Login') }}</a>
-                        <a href="{{ route('register') }}" class="transition hover:text-teal-700">{{ __('Register') }}</a>
-                    </nav>
-                @endguest
+            <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-6 py-6 text-sm text-gray-500 sm:flex-row">
+                <p>
+                    {{ __('Developed by') }}
+                    <a href="https://redmindtechnologies.com/" target="_blank" rel="noopener"
+                       class="font-bold text-gray-800 transition hover:opacity-75">
+                        <span class="text-red-600">R</span>ed<span class="text-red-600">M</span>ind Technologies
+                    </a>
+                </p>
+
+                <a href="mailto:support@redmindtechnologies.com"
+                   class="inline-flex items-center gap-1.5 font-medium transition hover:text-teal-700">
+                    <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                    support@redmindtechnologies.com
+                </a>
+
+                <p class="text-gray-400">
+                    © {{ now()->year }} {{ config('app.name') }} · {{ __('Version 1.0.0') }} · {{ __('Proof of Concept') }}
+                </p>
             </div>
         </footer>
     </div>
