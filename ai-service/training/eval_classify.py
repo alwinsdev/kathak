@@ -18,6 +18,8 @@ total = correct = 0
 IMG_EXT = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
 
 for split in ("val", "test"):
+    if not (DS / split).is_dir():
+        continue
     for cls_dir in (DS / split).iterdir():
         if not cls_dir.is_dir():
             continue

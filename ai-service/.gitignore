@@ -11,3 +11,4 @@ models/*.pt
 models/*.onnx
 datasets/
 runs/
+yolov8n-cls.pt

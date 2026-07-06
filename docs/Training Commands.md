@@ -1,0 +1,12 @@
+python training/capture_webcam.py shikhar
+python training/capture_webcam.py pataka
+python training/capture_webcam.py soochi
+python training/capture_webcam.py trishool
+python training/capture_webcam.py mayur
+python training/capture_webcam.py shuktund
+python training/capture_webcam.py ardhapataka
+python training/capture_webcam.py mushti
+python training/capture_webcam.py arala
+python training/capture_webcam.py ardhachandra
+python training/capture_webcam.py artarisamukha
+python training/capture_webcam.py tripataka
