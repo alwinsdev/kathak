@@ -8,6 +8,7 @@ enum Gender: string
 {
     case Male = 'male';
     case Female = 'female';
+    case Transgender = 'transgender';
     case Other = 'other';
 
     public function label(): string
@@ -15,6 +16,7 @@ enum Gender: string
         return match ($this) {
             self::Male => 'Male',
             self::Female => 'Female',
+            self::Transgender => 'Transgender',
             self::Other => 'Other',
         };
     }
