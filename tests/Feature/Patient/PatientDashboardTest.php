@@ -34,19 +34,23 @@ class PatientDashboardTest extends TestCase
             'status' => PrescriptionStatus::Active,
             'start_date' => now()->subDay()->toDateString(),
             'end_date' => null,
+            'mudra_id' => \App\Models\Mudra::factory()->create(['name' => 'ActiveMudra']),
         ]);
         $future = Prescription::factory()->create([
             'patient_id' => $patient->id,
             'start_date' => now()->addWeek()->toDateString(),
+            'mudra_id' => \App\Models\Mudra::factory()->create(['name' => 'FutureMudra']),
         ]);
         $expired = Prescription::factory()->create([
             'patient_id' => $patient->id,
             'start_date' => now()->subMonth()->toDateString(),
             'end_date' => now()->subDay()->toDateString(),
+            'mudra_id' => \App\Models\Mudra::factory()->create(['name' => 'ExpiredMudra']),
         ]);
         $cancelled = Prescription::factory()->cancelled()->create([
             'patient_id' => $patient->id,
             'start_date' => now()->subDay()->toDateString(),
+            'mudra_id' => \App\Models\Mudra::factory()->create(['name' => 'CancelledMudra']),
         ]);
 
         $response = $this->actingAs($patient)->get(route('patient.dashboard'));

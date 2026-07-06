@@ -49,7 +49,8 @@ class PracticeController extends Controller
             'completedToday' => $completedToday,
             'nextPractice' => $next?->prescription,
             'practiceConfig' => [
-                'holdSeconds' => (int) config('practice.hold_seconds'),
+                'holdSeconds' => $prescription->holdSeconds(),
+                'durationMin' => $prescription->duration_min,
                 'detectionIntervalMs' => (int) config('practice.detection_interval_ms'),
                 'jpegQuality' => (float) config('practice.jpeg_quality'),
                 'confidenceThreshold' => (float) config('practice.confidence_threshold'),

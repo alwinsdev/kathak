@@ -6,8 +6,8 @@
                 <h2 class="text-xl font-semibold leading-tight text-gray-800">
                     {{ __('Practice') }}: {{ $prescription->mudra->name }}
                 </h2>
-                <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
-                    {{ __('Hold') }} {{ $practiceConfig['holdSeconds'] }}s · {{ __('Confidence') }} ≥ {{ (int) round($practiceConfig['confidenceThreshold'] * 100) }}%
+                <span class="rounded-full bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700">
+                    {{ __('Prescribed duration') }}: {{ $prescription->duration_min }} {{ __('min') }} · {{ __('Confidence') }} ≥ {{ (int) round($practiceConfig['confidenceThreshold'] * 100) }}%
                 </span>
             </div>
             <a href="#mudra-guide" class="inline-flex items-center gap-1.5 text-sm font-medium text-teal-700 hover:text-teal-800">
@@ -113,11 +113,21 @@
                         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                             <div>
                                 <div class="text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Steps') }}</div>
-                                <ol class="mt-2 space-y-2 text-sm text-gray-700">
+                                <ol class="mt-3 space-y-3 text-sm text-gray-700">
                                     @foreach ($guide['steps'] as $i => $step)
-                                        <li class="flex gap-2">
-                                            <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-teal-600 text-[11px] font-semibold text-white">{{ $i + 1 }}</span>
-                                            <span>{{ $step }}</span>
+                                        <li class="flex items-start gap-3">
+                                            <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-teal-600 text-xs font-semibold text-white mt-1">{{ $i + 1 }}</span>
+                                            @if (isset($guide['step_images'][$i]))
+                                                <img src="{{ asset($guide['step_images'][$i]) }}" alt="Step {{ $i + 1 }}" class="h-14 w-14 rounded-lg object-cover border border-gray-200 shadow-sm shrink-0">
+                                            @endif
+                                            <div class="leading-snug">
+                                                @if (is_array($step))
+                                                    <strong class="font-semibold text-gray-900 block">{{ $step['title'] }}</strong>
+                                                    <span class="text-xs text-gray-500 mt-0.5 block">{{ $step['description'] }}</span>
+                                                @else
+                                                    <span>{{ $step }}</span>
+                                                @endif
+                                            </div>
                                         </li>
                                     @endforeach
                                 </ol>
@@ -126,11 +136,53 @@
                                 <div class="text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Common mistakes') }}</div>
                                 <ul class="mt-2 space-y-2 text-sm text-gray-700">
                                     @foreach ($guide['mistakes'] as $mistake)
-                                        <li class="flex gap-2"><span class="text-rose-500">✗</span><span>{{ $mistake }}</span></li>
+                                        <li class="flex gap-2"><span class="text-rose-500 font-bold">✗</span><span>{{ $mistake }}</span></li>
                                     @endforeach
                                 </ul>
                             </div>
                         </div>
+
+                        @if (isset($guide['before_start']) || isset($guide['tips']) || isset($guide['duration']))
+                            <hr class="my-6 border-gray-150">
+                            <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
+                                @if (isset($guide['before_start']))
+                                    <div>
+                                        <div class="text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Before You Start') }}</div>
+                                        <ul class="mt-2 space-y-1.5 text-sm text-gray-700">
+                                            @foreach ($guide['before_start'] as $item)
+                                                <li class="flex gap-2"><span class="text-teal-500 font-medium">✓</span><span>{{ $item }}</span></li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                @endif
+                                
+                                @if (isset($guide['tips']))
+                                    <div>
+                                        <div class="text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Important Tips') }}</div>
+                                        <ul class="mt-2 space-y-1.5 text-sm text-gray-700">
+                                            @foreach ($guide['tips'] as $item)
+                                                <li class="flex gap-2"><span class="text-amber-500">💡</span><span>{{ $item }}</span></li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                @endif
+
+                                <div>
+                                    <div class="text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Practice Duration') }}</div>
+                                    <div class="mt-2 rounded-xl bg-teal-50/50 p-3.5 border border-teal-100/50 text-sm text-gray-700 leading-relaxed space-y-2">
+                                        <div class="flex items-center gap-2">
+                                            <svg class="h-4 w-4 shrink-0 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                            <span>{{ __('Practice for') }} <strong class="text-gray-900">{{ $practiceConfig['durationMin'] }} {{ __('minutes') }}</strong> {{ __('per session') }}</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <svg class="h-4 w-4 shrink-0 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                                            <span>{{ __('Hold the mudra steady in front of the camera to verify completion') }}</span>
+                                        </div>
+                                        <p class="text-xs text-gray-500 italic">{{ __('Duration prescribed by your doctor.') }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
                     </x-card>
                 </div>
 
@@ -184,7 +236,7 @@
 
                         <div class="mt-4">
                             <div class="mb-1.5 flex items-center justify-between text-xs text-gray-500">
-                                <span class="font-medium">{{ __('Hold progress') }}</span>
+                                <span class="font-medium">{{ __('Verification progress') }}</span>
                                 <span id="practice-hold-label" class="font-semibold tabular-nums">0.0s / {{ $practiceConfig['holdSeconds'] }}s</span>
                             </div>
                             <div class="h-3 w-full overflow-hidden rounded-full bg-gray-100 ring-1 ring-inset ring-gray-900/5">

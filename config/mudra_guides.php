@@ -21,16 +21,51 @@ return [
     'aakash' => [
         'symbol' => '🌌',
         'steps' => [
-            'Touch the tip of your middle finger to the tip of your thumb.',
-            'Keep the index, ring and little fingers straight and relaxed.',
-            'Face your palm towards the camera.',
-            'Hold the gesture steady until the bar fills.',
+            [
+                'title' => 'Open Your Palm',
+                'description' => 'Open your palm directly facing the camera with all five fingers straight, extended, and relaxed.',
+            ],
+            [
+                'title' => 'Fold the Middle Finger',
+                'description' => 'Slowly bend only the middle finger toward the thumb. Keep the index, ring, and little fingers straight.',
+            ],
+            [
+                'title' => 'Touch the Thumb',
+                'description' => 'Gently touch the tip of the middle finger to the tip of the thumb, making light contact and forming a circle.',
+            ],
+            [
+                'title' => 'Straighten Remaining Fingers',
+                'description' => 'Keep the index, ring, and little fingers fully straight and relaxed while maintaining the thumb-middle finger contact.',
+            ],
+            [
+                'title' => 'Final Aakash Mudra',
+                'description' => 'Hold the completed gesture steady in front of the camera with the palm facing directly towards the screen.',
+            ],
+        ],
+        'step_images' => [
+            'images/mudras/aakash_step1.jpg',
+            'images/mudras/aakash_step2.jpg',
+            'images/mudras/aakash_step3.jpg',
+            'images/mudras/aakash_step4.jpg',
+            'images/mudras/aakash_step5.jpg',
+        ],
+        'tips' => [
+            'Keep your hand positioned within the camera frame.',
+            'Apply only gentle finger contact; avoid pressing forcefully.',
+            'Keep the non-touching fingers fully straight.',
+            'Hold the hand steady and avoid trembling.',
         ],
         'mistakes' => [
-            'Using the wrong finger to touch the thumb',
-            'Curling the extended fingers',
-            'Hand too far away or out of frame',
+            'Pressing the thumb and middle finger too hard.',
+            'Curling or bending the index, ring, or little fingers.',
+            'Moving the hand too fast or holding it out of frame.',
         ],
+        'before_start' => [
+            'Ensure the camera lens is clean and well-lit.',
+            'Position your hand approximately 1–2 feet away from the webcam.',
+            'Remove any rings or wrist accessories that might block visibility.',
+        ],
+        'duration' => 'Hold the final gesture steadily for 3 seconds to complete the verification session.',
     ],
 
     'default' => [

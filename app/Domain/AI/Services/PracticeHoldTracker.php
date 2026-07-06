@@ -22,7 +22,7 @@ class PracticeHoldTracker
 {
     public function record(PracticeSession $session, bool $matched, float $confidence): HoldProgress
     {
-        $holdSeconds = (int) config('practice.hold_seconds');
+        $holdSeconds = $session->prescription?->holdSeconds() ?? (int) config('practice.hold_seconds');
 
         if (! $matched) {
             $this->clear($session);

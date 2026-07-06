@@ -87,7 +87,7 @@ class PracticeDetectionController extends Controller
      */
     private function verifiedPayload(PracticeSession $session): array
     {
-        $holdSeconds = (int) config('practice.hold_seconds');
+        $holdSeconds = $session->prescription?->holdSeconds() ?? (int) config('practice.hold_seconds');
 
         return [
             'matched' => true,

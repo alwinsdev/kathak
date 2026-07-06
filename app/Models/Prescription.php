@@ -51,6 +51,14 @@ class Prescription extends Model
     }
 
     /**
+     * The verification hold time for practice sessions (global config default).
+     */
+    public function holdSeconds(): int
+    {
+        return (int) config('practice.hold_seconds');
+    }
+
+    /**
      * @return BelongsTo<User, $this>
      */
     public function patient(): BelongsTo
