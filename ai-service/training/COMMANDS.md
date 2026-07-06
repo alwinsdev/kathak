@@ -39,7 +39,8 @@ Runs in the dedicated `mp` conda env (Python 3.11, where mediapipe has wheels).
 ```powershell
 cd C:\xampp\htdocs\kathak\ai-service
 $env:API_KEY='change-me'; $env:DETECTION_CONFIDENCE='0.3'
-& C:\Users\iamal\miniconda3\envs\mp\python.exe -m uvicorn app.main:app --host 0.0.0.0 --port 8002
+# 127.0.0.1: internal service — must never be reachable from the network
+& C:\Users\iamal\miniconda3\envs\mp\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8002
 # check (new terminal):
 curl.exe -s http://localhost:8002/health
 ```

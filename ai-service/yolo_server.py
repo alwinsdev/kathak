@@ -27,6 +27,7 @@ from ultralytics import YOLO
 API_KEY = os.environ.get("API_KEY", "change-me")
 DETECT_URL = os.environ.get("MEDIAPIPE_DETECT_URL", "http://localhost:8002")
 CROP_PADDING = 0.35  # expand the hand bbox by this fraction on each side
+MAX_UPLOAD_BYTES = 5 * 1024 * 1024  # reject oversized frames (DoS guard)
 MODEL_PATH = Path(__file__).resolve().parent / "models" / "kathak.pt"
 
 model = YOLO(str(MODEL_PATH))
@@ -89,6 +90,8 @@ async def classify(
     raw = await image.read()
     if not raw:
         raise HTTPException(status_code=400, detail="empty image")
+    if len(raw) > MAX_UPLOAD_BYTES:
+        raise HTTPException(status_code=413, detail="image too large")
 
     frame = Image.open(io.BytesIO(raw)).convert("RGB")
     hand_img, crop_box = crop_to_hand(frame, raw)
@@ -118,4 +121,6 @@ async def classify(
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8001, log_level="info")
+    # Localhost only: this service is called by the Laravel backend on the same
+    # machine and must never be reachable from the network.
+    uvicorn.run(app, host="127.0.0.1", port=8001, log_level="info")
