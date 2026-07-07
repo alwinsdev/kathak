@@ -39,15 +39,22 @@ def map_hands(mp_result, image_width: int, image_height: int) -> list[HandLandma
 def _bbox_from_landmarks(
     landmarks: list[Landmark], image_width: int, image_height: int
 ) -> BoundingBox:
-    """Approximate, center-based pixel box from the landmark extents."""
+    """Approximate, center-based pixel box from the landmark extents, expanded slightly to fully capture fingertips and sides."""
     xs = [lm.x for lm in landmarks]
     ys = [lm.y for lm in landmarks]
     min_x, max_x = min(xs), max(xs)
     min_y, max_y = min(ys), max(ys)
 
+    w = max_x - min_x
+    h = max_y - min_y
+
+    # Add 12% padding to width and 15% padding to height to enclose physical hand boundaries
+    pad_w = w * 0.12
+    pad_h = h * 0.15
+
     return BoundingBox(
         cx=(min_x + max_x) / 2 * image_width,
         cy=(min_y + max_y) / 2 * image_height,
-        width=(max_x - min_x) * image_width,
-        height=(max_y - min_y) * image_height,
+        width=(w + pad_w) * image_width,
+        height=(h + pad_h) * image_height,
     )

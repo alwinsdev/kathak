@@ -49,7 +49,7 @@ return [
     ],
 
     'mediapipe' => [
-        'url' => env('MEDIAPIPE_URL', 'http://localhost:8001'),
+        'url' => env('MEDIAPIPE_URL', 'http://127.0.0.1:8001'),
         'key' => env('MEDIAPIPE_API_KEY'),
 
         /*

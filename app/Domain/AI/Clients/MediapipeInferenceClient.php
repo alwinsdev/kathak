@@ -58,6 +58,20 @@ class MediapipeInferenceClient implements InferenceClient
         // this boundary.
         $class = $this->mapLabel((string) $prediction['label']) ?? self::INCORRECT;
 
+        $handBox = $response->json('hand_box');
+        if (is_array($handBox)) {
+            return new InferenceResult([
+                new MudraPrediction(
+                    class: $class,
+                    confidence: (float) ($prediction['confidence'] ?? 0),
+                    x: (float) ($handBox['cx'] ?? null),
+                    y: (float) ($handBox['cy'] ?? null),
+                    width: (float) ($handBox['width'] ?? null),
+                    height: (float) ($handBox['height'] ?? null)
+                ),
+            ]);
+        }
+
         return new InferenceResult([
             new MudraPrediction($class, (float) ($prediction['confidence'] ?? 0)),
         ]);

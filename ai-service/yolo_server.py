@@ -25,7 +25,7 @@ from PIL import Image
 from ultralytics import YOLO
 
 API_KEY = os.environ.get("API_KEY", "change-me")
-DETECT_URL = os.environ.get("MEDIAPIPE_DETECT_URL", "http://localhost:8002")
+DETECT_URL = os.environ.get("MEDIAPIPE_DETECT_URL", "http://127.0.0.1:8002")
 CROP_PADDING = 0.35  # expand the hand bbox by this fraction on each side
 MAX_UPLOAD_BYTES = 5 * 1024 * 1024  # reject oversized frames (DoS guard)
 MODEL_PATH = Path(__file__).resolve().parent / "models" / "kathak.pt"
@@ -37,7 +37,7 @@ app = FastAPI(title="kathak-yolo")
 
 
 def crop_to_hand(pil_img: Image.Image, raw: bytes):
-    """Return (cropped_hand_image, crop_box) using the MediaPipe detector, or
+    """Return (cropped_hand_image, bbox) using the MediaPipe detector, or
     (None, None) if no hand is detected or the detector is unreachable."""
     try:
         resp = requests.post(
@@ -57,13 +57,11 @@ def crop_to_hand(pil_img: Image.Image, raw: bytes):
     bbox = hands[0]["bbox"]
     img_w, img_h = data["image_width"], data["image_height"]
     cx, cy, w, h = bbox["cx"], bbox["cy"], bbox["width"], bbox["height"]
-    x1 = max(0, int(cx - w / 2 - w * CROP_PADDING))
-    y1 = max(0, int(cy - h / 2 - h * CROP_PADDING))
-    x2 = min(img_w, int(cx + w / 2 + w * CROP_PADDING))
-    y2 = min(img_h, int(cy + h / 2 + h * CROP_PADDING))
-    if x2 <= x1 or y2 <= y1:
-        return None, "no_hand"
-    return pil_img.crop((x1, y1, x2, y2)), (x1, y1, x2, y2)
+    x1 = int(cx - w / 2 - w * CROP_PADDING)
+    y1 = int(cy - h / 2 - h * CROP_PADDING)
+    x2 = int(cx + w / 2 + w * CROP_PADDING)
+    y2 = int(cy + h / 2 + h * CROP_PADDING)
+    return pil_img.crop((x1, y1, x2, y2)), bbox
 
 
 @app.get("/health")
@@ -94,10 +92,10 @@ async def classify(
         raise HTTPException(status_code=413, detail="image too large")
 
     frame = Image.open(io.BytesIO(raw)).convert("RGB")
-    hand_img, crop_box = crop_to_hand(frame, raw)
+    hand_img, hand_box = crop_to_hand(frame, raw)
 
     # No hand in view -> no prediction (don't classify the empty scene).
-    if crop_box == "no_hand":
+    if hand_box == "no_hand":
         return {
             "success": True,
             "prediction": None,
@@ -111,13 +109,18 @@ async def classify(
     label = CLASS_NAMES[int(result.probs.top1)]
     confidence = float(result.probs.top1conf)
 
-    return {
+    resp_data = {
         "success": True,
         "prediction": {"label": label, "confidence": round(confidence, 4)},
         "hands_detected": 1,
         "cropped": hand_img is not None,
         "processing_time_ms": int((time.perf_counter() - started) * 1000),
     }
+
+    if isinstance(hand_box, dict):
+        resp_data["hand_box"] = hand_box
+
+    return resp_data
 
 
 if __name__ == "__main__":
