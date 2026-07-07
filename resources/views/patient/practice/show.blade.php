@@ -237,7 +237,8 @@
                         <div class="mt-4">
                             <div class="mb-1.5 flex items-center justify-between text-xs text-gray-500">
                                 <span class="font-medium">{{ __('Verification progress') }}</span>
-                                <span id="practice-hold-label" class="font-semibold tabular-nums">0.0s / {{ $practiceConfig['holdSeconds'] }}s</span>
+                                @php($holdTotal = (int) $practiceConfig['holdSeconds'])
+                                <span id="practice-hold-label" class="font-semibold tabular-nums">{{ $holdTotal >= 60 ? '0:00 / '.intdiv($holdTotal, 60).':'.str_pad((string) ($holdTotal % 60), 2, '0', STR_PAD_LEFT) : '0.0s / '.$holdTotal.'s' }}</span>
                             </div>
                             <div class="h-3 w-full overflow-hidden rounded-full bg-gray-100 ring-1 ring-inset ring-gray-900/5">
                                 <div id="practice-hold-bar" class="h-full w-0 rounded-full bg-gradient-to-r from-teal-500 to-emerald-400 transition-all duration-300"></div>

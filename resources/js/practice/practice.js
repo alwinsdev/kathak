@@ -97,11 +97,18 @@ function boot() {
         compare.classList.add('shake');
     };
 
+    // Prescribed durations are minutes long — show m:ss there, seconds for short holds.
+    const formatHold = (seconds, total) => {
+        if ((total ?? 0) < 60) return `${(seconds ?? 0).toFixed(1)}s`;
+        const whole = Math.floor(seconds ?? 0);
+        return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, '0')}`;
+    };
+
     const setHold = (held, hold) => {
         const pct = hold ? Math.max(0, Math.min(100, (held / hold) * 100)) : 0;
         if (holdBar) holdBar.style.width = `${pct.toFixed(0)}%`;
         if (holdStrip) holdStrip.style.width = `${pct.toFixed(0)}%`;
-        if (holdLabel) holdLabel.textContent = `${(held ?? 0).toFixed(1)}s / ${hold ?? 0}s`;
+        if (holdLabel) holdLabel.textContent = `${formatHold(held, hold)} / ${formatHold(hold, hold)}`;
     };
 
     const toggleButtons = (running) => {
@@ -196,7 +203,7 @@ function boot() {
             return;
         }
 
-        drawPredictions(overlay, video, data.predictions ?? []);
+        drawPredictions(overlay, video, data.predictions ?? [], targetLabel, target);
         setHold(data.held_seconds ?? 0, data.hold_seconds ?? 0);
 
         if (data.verified) {

@@ -51,10 +51,16 @@ class Prescription extends Model
     }
 
     /**
-     * The verification hold time for practice sessions (global config default).
+     * The verification hold time for practice sessions: the duration the
+     * doctor prescribed. Falls back to the global config default only when
+     * no duration is set.
      */
     public function holdSeconds(): int
     {
+        if ($this->duration_min !== null && $this->duration_min > 0) {
+            return (int) $this->duration_min * 60;
+        }
+
         return (int) config('practice.hold_seconds');
     }
 

@@ -28,8 +28,9 @@ class PracticeVerificationTest extends TestCase
     {
         config([
             'practice.confidence_threshold' => 0.75,
-            'practice.hold_seconds' => 2,
-            'practice.detection_interval_ms' => 1000,
+            'practice.hold_seconds' => 2, // fallback only — the prescription's duration wins
+            // Wide sampling so each 30s test step credits fully (cap = 75s).
+            'practice.detection_interval_ms' => 30000,
             'practice.hold_grace_factor' => 2.5,
         ]);
 
@@ -42,6 +43,7 @@ class PracticeVerificationTest extends TestCase
             'patient_id' => $patient->id,
             'mudra_id' => $mudra->id,
             'start_date' => now()->subDay()->toDateString(),
+            'duration_min' => 1, // hold target: 60s of practised time
         ]);
         $session = PracticeSession::factory()->create([
             'patient_id' => $patient->id,
@@ -71,11 +73,31 @@ class PracticeVerificationTest extends TestCase
         Carbon::setTestNow(Carbon::create(2026, 6, 29, 8, 0, 0));
         $this->detect($patient, $session)->assertOk()->assertJson(['verified' => false]);
 
-        Carbon::setTestNow(now()->addSecond());
+        Carbon::setTestNow(now()->addSeconds(30));
         $this->detect($patient, $session)->assertOk()->assertJson(['verified' => false]);
 
-        Carbon::setTestNow(now()->addSecond());
+        Carbon::setTestNow(now()->addSeconds(30));
         $this->detect($patient, $session)->assertOk()->assertJson(['verified' => true]);
+
+        $this->assertSame(PracticeStatus::Verified, $session->fresh()->status);
+        Carbon::setTestNow();
+    }
+
+    public function test_a_shaky_frame_is_smoothed_and_does_not_pause_the_hold(): void
+    {
+        [$patient, , $session] = $this->setup_scenario();
+
+        Carbon::setTestNow(Carbon::create(2026, 6, 29, 8, 0, 0));
+        $this->app->instance(InferenceClient::class, (new FakeInferenceClient)->withDetection('Pataka', 0.9));
+        $this->detect($patient, $session)->assertJson(['verified' => false]);
+        Carbon::setTestNow(now()->addSeconds(30));
+        $this->detect($patient, $session)->assertJson(['verified' => false]);
+
+        // Hand shake: one frame misclassifies — temporal smoothing rescues it,
+        // the hold keeps crediting, and the session completes on schedule.
+        $this->app->instance(InferenceClient::class, (new FakeInferenceClient)->withDetection('Mushti', 0.99));
+        Carbon::setTestNow(now()->addSeconds(30));
+        $this->detect($patient, $session)->assertJson(['matched' => true, 'verified' => true]);
 
         $this->assertSame(PracticeStatus::Verified, $session->fresh()->status);
         Carbon::setTestNow();
@@ -88,7 +110,7 @@ class PracticeVerificationTest extends TestCase
 
         Carbon::setTestNow(Carbon::create(2026, 6, 29, 8, 0, 0));
         foreach (range(0, 4) as $i) {
-            Carbon::setTestNow(now()->addSecond());
+            Carbon::setTestNow(now()->addSeconds(30));
             $this->detect($patient, $session)->assertJson(['verified' => false]);
         }
 
@@ -104,9 +126,9 @@ class PracticeVerificationTest extends TestCase
 
         Carbon::setTestNow(Carbon::create(2026, 6, 29, 8, 0, 0));
         $this->detect($patient, $session);
-        Carbon::setTestNow(now()->addSecond());
+        Carbon::setTestNow(now()->addSeconds(30));
         $this->detect($patient, $session);
-        Carbon::setTestNow(now()->addSecond());
+        Carbon::setTestNow(now()->addSeconds(30));
         $this->detect($patient, $session)->assertJson(['verified' => true]);
 
         // Duplicate / refresh / extra frames after verification.
@@ -125,9 +147,9 @@ class PracticeVerificationTest extends TestCase
 
         Carbon::setTestNow(Carbon::create(2026, 6, 29, 8, 0, 0));
         $this->detect($patient, $session);
-        Carbon::setTestNow(now()->addSecond());
+        Carbon::setTestNow(now()->addSeconds(30));
         $this->detect($patient, $session);
-        Carbon::setTestNow(now()->addSecond());
+        Carbon::setTestNow(now()->addSeconds(30));
         $this->detect($patient, $session)->assertJson(['verified' => true]);
         Carbon::setTestNow();
 
@@ -143,9 +165,9 @@ class PracticeVerificationTest extends TestCase
 
         Carbon::setTestNow(Carbon::create(2026, 6, 29, 8, 0, 0));
         $this->detect($patient, $session);
-        Carbon::setTestNow(now()->addSecond());
+        Carbon::setTestNow(now()->addSeconds(30));
         $this->detect($patient, $session);
-        Carbon::setTestNow(now()->addSecond());
+        Carbon::setTestNow(now()->addSeconds(30));
         $this->detect($patient, $session)->assertJson(['verified' => true]);
         Carbon::setTestNow();
 

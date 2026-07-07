@@ -23,18 +23,29 @@ return [
     // How often the browser samples a frame for detection (milliseconds).
     'detection_interval_ms' => (int) env('PRACTICE_DETECTION_INTERVAL_MS', 500),
 
-    // Tolerance for gaps between matched frames before the hold restarts,
-    // expressed as a multiple of the detection interval.
-    'hold_grace_factor' => (float) env('PRACTICE_HOLD_GRACE_FACTOR', 2.5),
+    // Cap on the time a single matched frame may credit, expressed as a
+    // multiple of the detection interval. Must comfortably cover a full
+    // inference round-trip (detector + classifier), otherwise a perfect hold
+    // accrues slower than real time.
+    'hold_grace_factor' => (float) env('PRACTICE_HOLD_GRACE_FACTOR', 4.0),
 
     // Time-to-live (seconds) for the cache-backed hold state of a session.
-    'hold_cache_ttl' => (int) env('PRACTICE_HOLD_CACHE_TTL', 300),
+    // Refreshed on every frame; sized for prescription-length sessions so a
+    // brief interruption does not lose accumulated practice time.
+    'hold_cache_ttl' => (int) env('PRACTICE_HOLD_CACHE_TTL', 1800),
 
     // Maximum accepted frame upload size (kilobytes).
     'max_image_kb' => (int) env('PRACTICE_MAX_IMAGE_KB', 2048),
 
     // JPEG quality used by the browser when encoding a frame (0–1).
     'jpeg_quality' => (float) env('PRACTICE_JPEG_QUALITY', 0.6),
+
+    // Anti-shake smoothing: how many recent frames vote on a flickering frame.
+    'smoothing_window' => (int) env('PRACTICE_SMOOTHING_WINDOW', 5),
+
+    // Minimum fraction of the window that must show the target mudra before a
+    // non-matching frame can be rescued as an isolated flicker.
+    'smoothing_min_agreement' => (float) env('PRACTICE_SMOOTHING_MIN_AGREEMENT', 0.6),
 
     // Per-user rate limit for the detection endpoint (requests per minute).
     'detect_rate_limit_per_minute' => (int) env('PRACTICE_DETECT_RATE_LIMIT_PER_MINUTE', 120),

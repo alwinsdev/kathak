@@ -12,29 +12,51 @@ use Illuminate\Support\Facades\Cache;
 /**
  * Owns the verification hold timer. Server-authoritative and cache-backed.
  *
- * Each matched frame credits the time since the previous matched frame, but a
- * single credit is capped (the "grace step") so that slow inference or a dropped
- * frame can never reset the hold — only a frame that does NOT match the target
- * resets it. This keeps the hold intuitive ("keep showing the mudra and the bar
- * fills") even though inference latency makes frames arrive a few seconds apart.
+ * The target is the doctor-prescribed duration, so progress is treated as
+ * TOTAL practised time, not one unbroken streak:
+ *
+ * - A matched frame credits the time since the previous frame, capped by the
+ *   grace step, so slow inference or a dropped frame contributes a bounded
+ *   amount instead of stalling or inflating the hold.
+ * - A frame that does NOT match (wrong pose, confidence dip, hand briefly out
+ *   of view) PAUSES the hold: progress is kept, nothing is credited, and the
+ *   next matched frame resumes from where it stopped. The classifier flickers
+ *   below the threshold even during a good hold, so resetting would make long
+ *   prescriptions impossible to complete.
+ * - The session completes only on a matched frame that reaches the target.
  */
 class PracticeHoldTracker
 {
     public function record(PracticeSession $session, bool $matched, float $confidence): HoldProgress
     {
         $holdSeconds = $session->prescription?->holdSeconds() ?? (int) config('practice.hold_seconds');
-
-        if (! $matched) {
-            $this->clear($session);
-
-            return new HoldProgress(0.0, $holdSeconds, false, 0.0);
-        }
-
         $now = $this->nowMs();
+        $ttl = (int) config('practice.hold_cache_ttl');
         $state = Cache::get($this->key($session));
 
+        if (! $matched) {
+            if (! is_array($state)) {
+                return new HoldProgress(0.0, $holdSeconds, false, 0.0);
+            }
+
+            // Pause: keep the accumulated time, refresh the TTL, and advance
+            // the frame marker so the mismatch period itself is never credited.
+            Cache::put(
+                $this->key($session),
+                ['accumulated' => $state['accumulated'], 'last' => $now, 'best' => $state['best'] ?? 0.0],
+                $ttl,
+            );
+
+            return new HoldProgress(
+                heldSeconds: round($state['accumulated'] / 1000, 2),
+                holdSeconds: $holdSeconds,
+                ready: false,
+                bestConfidence: (float) ($state['best'] ?? 0.0),
+            );
+        }
+
         // Cap a single credit so a long gap (slow inference / one dropped frame)
-        // contributes a bounded amount rather than resetting progress.
+        // contributes a bounded amount rather than inflating progress.
         $maxStepMs = (int) round(((int) config('practice.detection_interval_ms')) * ((float) config('practice.hold_grace_factor')));
 
         if (is_array($state)) {
@@ -48,7 +70,7 @@ class PracticeHoldTracker
         Cache::put(
             $this->key($session),
             ['accumulated' => $accumulatedMs, 'last' => $now, 'best' => $bestConfidence],
-            (int) config('practice.hold_cache_ttl'),
+            $ttl,
         );
 
         return new HoldProgress(

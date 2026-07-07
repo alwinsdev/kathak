@@ -29,8 +29,9 @@ class MediapipePracticeFlowTest extends TestCase
     {
         config([
             'practice.confidence_threshold' => 0.75,
-            'practice.hold_seconds' => 2,
-            'practice.detection_interval_ms' => 1000,
+            'practice.hold_seconds' => 2, // fallback only — the prescription's duration wins
+            // Wide sampling so each 30s test step credits fully (cap = 75s).
+            'practice.detection_interval_ms' => 30000,
             'practice.hold_grace_factor' => 2.5,
             // Use the self-hosted MediaPipe driver end-to-end.
             'services.inference.driver' => 'mediapipe',
@@ -51,6 +52,7 @@ class MediapipePracticeFlowTest extends TestCase
             'patient_id' => $patient->id,
             'mudra_id' => $mudra->id,
             'start_date' => now()->subDay()->toDateString(),
+            'duration_min' => 1, // hold target: 60s of practised time
         ]);
         $session = PracticeSession::factory()->create([
             'patient_id' => $patient->id,
@@ -87,10 +89,10 @@ class MediapipePracticeFlowTest extends TestCase
         Carbon::setTestNow(Carbon::create(2026, 6, 30, 8, 0, 0));
         $this->detect($patient, $session)->assertOk()->assertJson(['verified' => false]);
 
-        Carbon::setTestNow(now()->addSecond());
+        Carbon::setTestNow(now()->addSeconds(30));
         $this->detect($patient, $session)->assertOk()->assertJson(['verified' => false]);
 
-        Carbon::setTestNow(now()->addSecond());
+        Carbon::setTestNow(now()->addSeconds(30));
         $this->detect($patient, $session)->assertOk()->assertJson(['verified' => true]);
 
         $this->assertSame(PracticeStatus::Verified, $session->fresh()->status);

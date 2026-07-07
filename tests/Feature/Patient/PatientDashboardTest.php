@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Patient;
 
 use App\Enums\PrescriptionStatus;
+use App\Models\Mudra;
 use App\Models\PatientProfile;
 use App\Models\PracticeSession;
 use App\Models\Prescription;
@@ -34,23 +35,23 @@ class PatientDashboardTest extends TestCase
             'status' => PrescriptionStatus::Active,
             'start_date' => now()->subDay()->toDateString(),
             'end_date' => null,
-            'mudra_id' => \App\Models\Mudra::factory()->create(['name' => 'ActiveMudra']),
+            'mudra_id' => Mudra::factory()->create(['name' => 'ActiveMudra']),
         ]);
         $future = Prescription::factory()->create([
             'patient_id' => $patient->id,
             'start_date' => now()->addWeek()->toDateString(),
-            'mudra_id' => \App\Models\Mudra::factory()->create(['name' => 'FutureMudra']),
+            'mudra_id' => Mudra::factory()->create(['name' => 'FutureMudra']),
         ]);
         $expired = Prescription::factory()->create([
             'patient_id' => $patient->id,
             'start_date' => now()->subMonth()->toDateString(),
             'end_date' => now()->subDay()->toDateString(),
-            'mudra_id' => \App\Models\Mudra::factory()->create(['name' => 'ExpiredMudra']),
+            'mudra_id' => Mudra::factory()->create(['name' => 'ExpiredMudra']),
         ]);
         $cancelled = Prescription::factory()->cancelled()->create([
             'patient_id' => $patient->id,
             'start_date' => now()->subDay()->toDateString(),
-            'mudra_id' => \App\Models\Mudra::factory()->create(['name' => 'CancelledMudra']),
+            'mudra_id' => Mudra::factory()->create(['name' => 'CancelledMudra']),
         ]);
 
         $response = $this->actingAs($patient)->get(route('patient.dashboard'));

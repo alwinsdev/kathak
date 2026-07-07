@@ -10,6 +10,7 @@ use App\Domain\AI\Exceptions\InferenceException;
 use App\Domain\AI\Metrics\AiMetric;
 use App\Domain\AI\Services\PracticeHoldTracker;
 use App\Domain\AI\Services\PracticeSessionService;
+use App\Domain\AI\Services\PredictionSmoother;
 use App\Enums\PracticeStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Patient\DetectFrameRequest;
@@ -21,6 +22,7 @@ class PracticeDetectionController extends Controller
 {
     public function __construct(
         private readonly VerifyPracticeAction $verify,
+        private readonly PredictionSmoother $smoother,
         private readonly PracticeHoldTracker $holdTracker,
         private readonly PracticeSessionService $sessions,
         private readonly MetricsRecorder $metrics,
@@ -57,6 +59,10 @@ class PracticeDetectionController extends Controller
 
         $this->metrics->observe(AiMetric::AVERAGE_PROCESSING_TIME_MS, $detection->processingMs);
 
+        // Anti-shake: judge the frame against recent evidence so one tremor /
+        // motion-blur frame cannot flash "incorrect" or pause the hold.
+        $detection = $this->smoother->smooth($session, $detection);
+
         $progress = $this->holdTracker->record($session, $detection->matched, $detection->confidence);
 
         if ($progress->ready) {
@@ -70,6 +76,7 @@ class PracticeDetectionController extends Controller
             if ($justCompleted) {
                 $this->metrics->increment(AiMetric::VERIFICATION_SUCCESS);
                 $this->holdTracker->clear($session);
+                $this->smoother->clear($session);
             }
         }
 

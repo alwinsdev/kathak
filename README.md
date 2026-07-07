@@ -148,10 +148,12 @@ All AI behaviour is config-driven in [config/practice.php](config/practice.php) 
 | Key | Default | Purpose |
 |---|---|---|
 | `confidence_threshold` | 0.75 | min confidence for a match |
-| `hold_seconds` | 3 | how long the correct mudra must be held |
+| `hold_seconds` | 3 | fallback hold time — the doctor-prescribed duration wins |
 | `detection_interval_ms` | 500 | frame sampling interval |
-| `hold_grace_factor` | 2.5 | jitter tolerance before the hold restarts |
-| `hold_cache_ttl` | 300 | TTL of cached hold state |
+| `hold_grace_factor` | 4.0 | cap on the time one matched frame may credit |
+| `hold_cache_ttl` | 1800 | TTL of cached hold state (refreshed per frame) |
+| `smoothing_window` | 5 | recent frames voting on a flickering frame (anti-shake) |
+| `smoothing_min_agreement` | 0.6 | window fraction that must show the target to rescue a frame |
 | `max_image_kb` | 2048 | max frame upload size |
 | `jpeg_quality` | 0.6 | browser JPEG encode quality |
 | `detect_rate_limit_per_minute` | 120 | per-user detect throttle |
@@ -184,7 +186,7 @@ npm run build   # production assets (run after adding new Tailwind classes)
 
 ## Security
 
-Audited against an enterprise OWASP-aligned Laravel ruleset ([docs/SECURITY_RULES.md](docs/SECURITY_RULES.md)). Highlights: security headers middleware, auth-route throttling, anti-enumeration on password reset, localhost-only AI services with API key + upload caps, encrypted sessions, policies on every record access. Full rule-by-rule results and the pre-production gate list: [.claude/SECURITY_CHECKLIST.md](.claude/SECURITY_CHECKLIST.md).
+Audited against an enterprise OWASP-aligned Laravel ruleset. Highlights: security headers middleware, auth-route throttling, anti-enumeration on password reset, localhost-only AI services with API key + upload caps, encrypted sessions, policies on every record access. Full rule-by-rule results and the pre-production gate list: [.claude/SECURITY_CHECKLIST.md](.claude/SECURITY_CHECKLIST.md).
 
 ## Future roadmap
 

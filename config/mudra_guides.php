@@ -65,7 +65,7 @@ return [
             'Position your hand approximately 1–2 feet away from the webcam.',
             'Remove any rings or wrist accessories that might block visibility.',
         ],
-        'duration' => 'Hold the final gesture steadily for 3 seconds to complete the verification session.',
+        'duration' => 'Hold the final gesture steadily for your prescribed duration to complete the verification session. Brief slips only pause the timer — it resumes when the mudra is correct again.',
     ],
 
     'default' => [
